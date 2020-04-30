@@ -1,0 +1,12 @@
+elpa
+url
+auto-save-list
+autosaves
+.cache
+*~
+\#*#
+tramp
+network-security.data
+ido.last
+recentf
+email.el

@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: get-set
+# key: gs
+# --
+{ get; set; }$0

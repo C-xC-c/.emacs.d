@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: defignore
+# key: defignore
+# --
+(defignore ${1} (${2})
+	${3})
+$0
