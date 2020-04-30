@@ -196,17 +196,15 @@ Saves config.org if it's open then reloads the file.
 #+END_SRC
 ** omnisharp
 #+BEGIN_SRC emacs-lisp
-  ;; (use-package csharp-mode
-  ;;   :defer t)
+  (use-package csharp-mode
+    :defer t
+    :config ((use-package omnisharp
+	       :config (add-hook 'csharp-mode-hook 'omnisharp-mode))))
 
-  ;; (use-package omnisharp
-  ;;   :defer t
-  ;;   :init (add-hook 'csharp-mode-hook 'omnisharp-mode))
+  (eval-after-load 'company
+    '(add-to-list 'company-backends 'company-omnisharp))
 
-  ;; (eval-after-load 'company
-  ;;   '(add-to-list 'company-backends 'company-omnisharp))
-
-  ;; (add-hook 'csharp-mode #'company-mode)
+  (add-hook 'csharp-mode #'company-mode)
 #+END_SRC
 ** spaceline
 #+BEGIN_SRC emacs-lisp
