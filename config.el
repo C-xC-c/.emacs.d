@@ -1,3 +1,8 @@
+(use-package benchmark-init
+  :ensure t
+  :config
+  (add-hook 'after-init-hook 'benchmark-init/deactivate))
+
 (defmacro definteractive (name &rest body)
   `(defun ,name ,(car body)
      (interactive)
@@ -111,23 +116,25 @@
 (setq use-package-always-ensure t
       use-package-verbose t)
 
-(use-package keychain-environment
-  :bind ("C-c r e" . 'keychain-refresh-environment))
+(use-package diminish)
 
-(use-package exwm
+(use-package keychain-environment
+  :bind ("C-c r e" . 'keychain-refresh-environment)
+  :init (keychain-refresh-environment))
+
+(unless (display-graphic-p)
+  (use-package exwm
   :bind ("s-k" . 'exwm-workspace-delete)
   :config
   (require 'exwm-config)
   (require 'exwm-systemtray)
-  (exwm-systemtray-enable))
+  (exwm-systemtray-enable)))
 
 (use-package nginx-mode
   :custom
   (nginx-indent-tabs-mode t)
   (nginx-indent-level 2)
   :config (add-to-list 'auto-mode-alist '("/nginx/sites-\\(?:available\\|enabled\\)/" . nginx-mode)))
-
-(use-package diminish)
 
 (use-package company
   :diminish 'company-mode
@@ -138,17 +145,14 @@
   (company-minimum-prefix-length 3)
   :init (add-hook 'after-init-hook 'global-company-mode))
 
-;; (use-package csharp-mode
-;;   :defer t)
-
-;; (use-package omnisharp
-;;   :defer t
-;;   :init (add-hook 'csharp-mode-hook 'omnisharp-mode))
-
-;; (eval-after-load 'company
-;;   '(add-to-list 'company-backends 'company-omnisharp))
-
-;; (add-hook 'csharp-mode #'company-mode)
+(use-package csharp-mode
+  :defer t
+  :config
+  (use-package omnisharp
+    :defer t
+    :config
+    (add-hook 'csharp-mode-hook 'omnisharp-mode)
+    (add-to-list 'company-backends 'company-omnisharp)))
 
 (use-package spaceline
   :init
@@ -193,9 +197,20 @@
   :defer t
   :config (use-package alchemist))
 
+(use-package yasnippet
+  :diminish 'yas-minor-mode
+  :hook ((html-mode
+	  LaTeX-mode
+	  emacs-lisp-mode
+	  lisp-mode)
+	 . yas-minor-mode)
+  :init
+  (use-package yasnippet-snippets)
+  (yas-reload-all))
+
 (use-package hungry-delete
   :diminish 'hungry-delete-mode
-  :config (global-hungry-delete-mode 1))2
+  :config (global-hungry-delete-mode 1))
 
 (use-package which-key
   :diminish 'which-key-mode
@@ -210,17 +225,6 @@
 
 (use-package popup-kill-ring
   :bind ("M-y" . popup-kill-ring))
-
-(use-package yasnippet
-    :diminish 'yas-minor-mode
-:bind
-    :init
-    (use-package yasnippet-snippets)
-    (yas-reload-all))
-
-(add-hook 'html-mode-hook 'yas-minor-mode)
-(add-hook 'LaTeX-mode-hook 'yas-minor-mode)
-(add-hook 'emacs-lisp-mode 'yas-minor-mode)
 
 (setq ido-enable-flex-matching t
       ido-create-new-buffer 'always
@@ -307,24 +311,16 @@ It disables backup creation and auto saving.
 With no argument, this command toggles the mode.
 Non-null prefix argument turns on the mode.
 Null prefix argument turns off the mode."
-  ;; The initial value.
-  nil
-  ;; The indicator for the mode line.
-  " Sensitive"
-  ;; The minor mode bindings.
-  nil
+  nil ;; Initial
+  "Sensitive" ;; Modeline
+  nil ;; Bindings
   (if (symbol-value sensitive-minor-mode)
       (progn
-	;; disable backups
-	(set (make-local-variable 'backup-inhibited) t) 
-	;; disable auto-save
-	(if auto-save-default
-	    (auto-save-mode -1)))
-					;resort to default value of backup-inhibited
-    (kill-local-variable 'backup-inhibited)
-					;resort to default auto save setting
-    (if auto-save-default
-	(auto-save-mode 1))))
+	(setq make-backup-files nil)
+	(auto-save-mode -1))
+    (setq-local make-backup-files t)
+    (auto-save-mode 1)))
+
 
 ;; Regexps of sensitive files.
 (setq auto-minor-mode-alist

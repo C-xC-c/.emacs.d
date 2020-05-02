@@ -1,3 +1,10 @@
+* Benchmark
+  #+BEGIN_SRC emacs-lisp
+  (use-package benchmark-init
+    :ensure t
+    :config
+    (add-hook 'after-init-hook 'benchmark-init/deactivate))
+  #+END_SRC
 * macros
 ** definteractive
 Wrappers around functions and lambdas so I don't have to type
@@ -12,8 +19,8 @@ Wrappers around functions and lambdas so I don't have to type
     `(lambda ,(car body) (interactive) ,@(cdr body)))
 #+END_SRC
 ** local-keybind
-Hide unecessary lambda when calling (local-set-key) for org-mode
-functions
+Hide unecessary lambda when calling (local-set-key) for
+org-modefunctions
 #+BEGIN_SRC emacs-lisp
   (defmacro local-keybind (key value)
     `(lambda () (local-set-key (kbd ,key) (quote ,value))))
@@ -36,6 +43,9 @@ Saves config.org if it's open then reloads the file.
 
   ;; I read somewhere that Company breaks things?
   (add-hook 'org-mode-hook 'company-mode)
+
+  ;; Don't indent whole file with org-mode
+  (eval-after-load "org-mode" (local-set-key (kbd "s-i") nil))
 #+END_SRC
 ** Snippets
 #+BEGIN_SRC emacs-lisp
@@ -66,7 +76,7 @@ Saves config.org if it's open then reloads the file.
   (add-hook 'org-mode-hook (local-keybind "C-c o l" manx/delete-org-link))
 #+END_SRC
 *** Inline Images
-#+BEGIN_SRC emacs-lisp
+ #+BEGIN_SRC emacs-lisp
   (setq org-image-actual-width 150)
 
   (definteractive manx/org-insert-link ()
@@ -74,10 +84,10 @@ Saves config.org if it's open then reloads the file.
     (org-redisplay-inline-images))
 
   (add-hook 'org-mode-hook (local-keybind "C-c C-l" manx/org-insert-link))
-#+END_SRC
+ #+END_SRC
 * emacs gui
 #+BEGIN_SRC emacs-lisp
-  (tool-bar-mode -1)
+  1(tool-bar-mode -1)
   (menu-bar-mode -1)
   (scroll-bar-mode -1)
   (line-number-mode 1)
@@ -89,41 +99,41 @@ Saves config.org if it's open then reloads the file.
 * functions
 ** text
 *** kill whole word
-#+BEGIN_SRC emacs-lisp
+ #+BEGIN_SRC emacs-lisp
   (definteractive manx/kill-whole-word ()
     (backward-word)
     (kill-word 1))
 
   (global-set-key (kbd "C-c k w") 'manx/kill-whole-word)
-#+END_SRC
+ #+END_SRC
 *** kill whole line
-#+BEGIN_SRC emacs-lisp
+ #+BEGIN_SRC emacs-lisp
   (definteractive manx/kill-whole-line()
     (move-beginning-of-line nil)
     (kill-whole-line))
 
   (global-set-key (kbd "C-c k l") 'manx/kill-whole-line)
-#+END_SRC
+ #+END_SRC
 *** revert buffer
-#+BEGIN_SRC emacs-lisp
+ #+BEGIN_SRC emacs-lisp
   (global-set-key (kbd "C-c r b") 'revert-buffer)
-#+END_SRC
+ #+END_SRC
 *** Format whole file 
-#+BEGIN_SRC emacs-lisp
+ #+BEGIN_SRC emacs-lisp
   (definteractive manx/format-whole-buffer()
     (save-excursion
       (indent-region (point-min) (point-max) nil)))
 
   (global-set-key (kbd "s-i") 'manx/format-whole-buffer)
-#+END_SRC
+ #+END_SRC
 *** colour under cursor
-#+BEGIN_SRC emacs-lisp
+ #+BEGIN_SRC emacs-lisp
   (defun what-face (pos)
     (interactive "d")
     (let ((face (or (get-char-property (pos) 'read-face-name)
 		    (get-char-property (pos) 'face))))
       (if face (message "Face: %s" face) (message "No face at %d" pos))))
-#+END_SRC
+ #+END_SRC
 ** buffers
 #+BEGIN_SRC emacs-lisp
   (global-set-key (kbd "C-x k") (lambdainteractive () (kill-buffer (current-buffer))))
@@ -131,7 +141,7 @@ Saves config.org if it's open then reloads the file.
 #+END_SRC
 ** frames
 *** transpose-frame
-#+BEGIN_SRC emacs-lisp
+ #+BEGIN_SRC emacs-lisp
   ;; This is only used here for now but we should still more it some
   ;; time
   (add-to-list 'load-path "~/.emacs.d/scripts/")
@@ -140,9 +150,9 @@ Saves config.org if it's open then reloads the file.
   (global-set-key (kbd "C-c f t") 'transpose-frame)
   (global-set-key (kbd "C-c f i") 'flip-frame)
   (global-set-key (kbd "C-c f o") 'flop-frame)
-#+END_SRC
+ #+END_SRC
 *** split and follow
-#+BEGIN_SRC emacs-lisp
+ #+BEGIN_SRC emacs-lisp
   (defmacro manx/split-and-follow (direction)
     `(progn
        ,direction
@@ -151,25 +161,31 @@ Saves config.org if it's open then reloads the file.
 
   (global-set-key (kbd "C-x 3") (lambdainteractive () (manx/split-and-follow (split-window-below))))
   (global-set-key (kbd "C-x 2") (lambdainteractive () (manx/split-and-follow (split-window-horizontally))))
-#+END_SRC
+ #+END_SRC
 * use-package
 #+BEGIN_SRC emacs-lisp
-  (setq use-package-always-ensure t
-	use-package-verbose t)
+    (setq use-package-always-ensure t
+	  use-package-verbose t)
+#+END_SRC
+** diminish
+#+BEGIN_SRC emacs-lisp
+  (use-package diminish)
 #+END_SRC
 ** keychain-environment
 #+BEGIN_SRC emacs-lisp
-  (use-package keychain-environment
-    :bind ("C-c r e" . 'keychain-refresh-environment))
+     (use-package keychain-environment
+       :bind ("C-c r e" . 'keychain-refresh-environment)
+       :init (keychain-refresh-environment))
 #+END_SRC
 ** exwm
 #+BEGIN_SRC emacs-lisp
-  (use-package exwm
-    :bind ("s-k" . 'exwm-workspace-delete)
-    :config
-    (require 'exwm-config)
-    (require 'exwm-systemtray)
-    (exwm-systemtray-enable))
+     (unless (display-graphic-p)
+       (use-package exwm
+       :bind ("s-k" . 'exwm-workspace-delete)
+       :config
+       (require 'exwm-config)
+       (require 'exwm-systemtray)
+       (exwm-systemtray-enable)))
 #+END_SRC
 ** nginx
 #+BEGIN_SRC emacs-lisp
@@ -178,10 +194,6 @@ Saves config.org if it's open then reloads the file.
     (nginx-indent-tabs-mode t)
     (nginx-indent-level 2)
     :config (add-to-list 'auto-mode-alist '("/nginx/sites-\\(?:available\\|enabled\\)/" . nginx-mode)))
-#+END_SRC
-** diminish
-#+BEGIN_SRC emacs-lisp
-  (use-package diminish)
 #+END_SRC
 ** company
 #+BEGIN_SRC emacs-lisp
@@ -194,17 +206,17 @@ Saves config.org if it's open then reloads the file.
     (company-minimum-prefix-length 3)
     :init (add-hook 'after-init-hook 'global-company-mode))
 #+END_SRC
-** omnisharp
+** c#
 #+BEGIN_SRC emacs-lisp
-  (use-package csharp-mode
-    :defer t
-    :config ((use-package omnisharp
-	       :config (add-hook 'csharp-mode-hook 'omnisharp-mode))))
+     (use-package csharp-mode
+       :defer t
+       :config
+       (use-package omnisharp
+	 :defer t
+	 :config
+	 (add-hook 'csharp-mode-hook 'omnisharp-mode)
+	 (add-to-list 'company-backends 'company-omnisharp)))
 
-  (eval-after-load 'company
-    '(add-to-list 'company-backends 'company-omnisharp))
-
-  (add-hook 'csharp-mode #'company-mode)
 #+END_SRC
 ** spaceline
 #+BEGIN_SRC emacs-lisp
@@ -214,7 +226,6 @@ Saves config.org if it's open then reloads the file.
     (setq powerline-default-seperator (quote arrow))
     (spaceline-spacemacs-theme)
     :config (spaceline-toggle-buffer-size-off))
-
 #+END_SRC
 ** dashboard
 #+BEGIN_SRC emacs-lisp
@@ -260,50 +271,48 @@ Saves config.org if it's open then reloads the file.
     :defer t
     :config (use-package alchemist))
 #+END_SRC
+** yasnippet
+ #+BEGIN_SRC emacs-lisp
+    (use-package yasnippet
+      :diminish 'yas-minor-mode
+      :hook ((html-mode
+	      LaTeX-mode
+	      emacs-lisp-mode
+	      lisp-mode)
+	     . yas-minor-mode)
+      :init
+      (use-package yasnippet-snippets)
+      (yas-reload-all))
+ #+END_SRC
 ** minor modes
 *** hungry delete
-#+BEGIN_SRC emacs-lisp
+ #+BEGIN_SRC emacs-lisp
   (use-package hungry-delete
     :diminish 'hungry-delete-mode
-    :config (global-hungry-delete-mode 1))2
-#+END_SRC
+    :config (global-hungry-delete-mode 1))
+ #+END_SRC
 *** which key
-#+BEGIN_SRC emacs-lisp
+ #+BEGIN_SRC emacs-lisp
   (use-package which-key
     :diminish 'which-key-mode
     :config (which-key-mode))
-#+END_SRC
+ #+END_SRC
 *** avy
-#+BEGIN_SRC emacs-lisp
+ #+BEGIN_SRC emacs-lisp
   (use-package avy
     :bind ("M-s" . avy-goto-char))
-#+END_SRC
+ #+END_SRC
 *** beacon
-#+BEGIN_SRC emacs-lisp
+ #+BEGIN_SRC emacs-lisp
   (use-package beacon
     :diminish 'beacon-mode
     :config (beacon-mode 1))
-#+END_SRC
+ #+END_SRC
 *** popup kill ring
-#+BEGIN_SRC emacs-lisp
+ #+BEGIN_SRC emacs-lisp
   (use-package popup-kill-ring
     :bind ("M-y" . popup-kill-ring))
-#+END_SRC
-*** yasnippet
-#+BEGIN_SRC emacs-lisp
-  (use-package yasnippet
-    :diminish 'yas-minor-mode
-:bind
-    :init
-    (use-package yasnippet-snippets)
-    (yas-reload-all))
-#+END_SRC
-**** enable for major modes
-#+BEGIN_SRC emacs-lisp
-  (add-hook 'html-mode-hook 'yas-minor-mode)
-  (add-hook 'LaTeX-mode-hook 'yas-minor-mode)
-  (add-hook 'emacs-lisp-mode 'yas-minor-mode)
-#+END_SRC
+ #+END_SRC
 * ido
 #+BEGIN_SRC emacs-lisp
   (setq ido-enable-flex-matching t
@@ -339,14 +348,14 @@ Saves config.org if it's open then reloads the file.
 #+END_SRC
 ** terminal
 *** Make bash implicit terminal
-#+BEGIN_SRC emacs-lisp
+ #+BEGIN_SRC emacs-lisp
   (defvar my-term-shell "/bin/bash")
   (defadvice ansi-term (before force-bash)
     (interactive (list my-term-shell)))
   (ad-activate 'ansi-term)
 
   (global-set-key (kbd "<s-return>") 'ansi-term)
-#+END_SRC
+ #+END_SRC
 ** minor things
 #+BEGIN_SRC emacs-lisp
   (show-paren-mode 1)
@@ -376,7 +385,7 @@ Saves config.org if it's open then reloads the file.
   (defvaralias 'css-indent-offset 'tab-width)
 #+END_SRC
 * auto-minor-mode
-auto-mode-alist but for minor modes.
+auto-mode-alist for minor modes.
 
 For example, used with sensitive-mode to not create backups
 (path/to/file~) when creating yasnippets
@@ -402,7 +411,7 @@ For example, used with sensitive-mode to not create backups
 	      (funcall (cdar alist) 1))
 	  (setq alist (cdr alist))))))
 
-  (add-hook 'find-file-hook #'enable-minor-mode-based-on-extension)
+  (add-hook 'find-file-hook#'enable-minor-mode-based-on-extension)
 #+END_SRC
 * sensitive-minor-mode
 #+BEGIN_SRC emacs-lisp
@@ -413,24 +422,16 @@ For example, used with sensitive-mode to not create backups
   With no argument, this command toggles the mode.
   Non-null prefix argument turns on the mode.
   Null prefix argument turns off the mode."
-    ;; The initial value.
-    nil
-    ;; The indicator for the mode line.
-    " Sensitive"
-    ;; The minor mode bindings.
-    nil
+    nil ;; Initial
+    "Sensitive" ;; Modeline
+    nil ;; Bindings
     (if (symbol-value sensitive-minor-mode)
 	(progn
-	  ;; disable backups
-	  (set (make-local-variable 'backup-inhibited) t) 
-	  ;; disable auto-save
-	  (if auto-save-default
-	      (auto-save-mode -1)))
-					  ;resort to default value of backup-inhibited
-      (kill-local-variable 'backup-inhibited)
-					  ;resort to default auto save setting
-      (if auto-save-default
-	  (auto-save-mode 1))))
+	  (setq make-backup-files nil)
+	  (auto-save-mode -1))
+      (setq-local make-backup-files t)
+      (auto-save-mode 1)))
+
 
   ;; Regexps of sensitive files.
   (setq auto-minor-mode-alist
