@@ -448,7 +448,3 @@ For example, used with sensitive-mode to not create backups
 	      (push
 	       '("lambdainteractive" . ?Λ) prettify-symbols-alist)))
 #+END_SRC
-* Email
-#+BEGIN_SRC emacs-lisp
-  (load "~/.emacs.d/email.el")
-#+END_SRC

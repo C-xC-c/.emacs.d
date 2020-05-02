@@ -15,19 +15,23 @@
   (package-install 'spacemacs-theme))
 
 (defun in-emacs-home (file)
+  "Checks if a file exists in your emacs home"
   (when (stringp file)
     (let ((file (concat user-emacs-directory file)))
       (when (file-exists-p file)
 	file))))
 
+;; Files we care about loading
 (setq custom-file (in-emacs-home "custom.el"))
 (defconst emacs-config (in-emacs-home "config.el"))
 (defconst emacs-org (in-emacs-home "config.org"))
+(defconst emacs-email (in-emacs-home "email.el"))
 
-;; org-babel won't compile these sometimes?
-(load emacs-config)
-(load custom-file 'noerrror)
-
-(when (file-newer-than-file-p emacs-org emacs-config)
-  (org-babel-load-file emacs-org))
-
+;; If everything exists then execute files
+(when (mapcar (lambda (x) (not (null x)))
+	      (list custom-file emacs-config emacs-org emacs-email))
+  (if (file-newer-than-file-p emacs-org emacs-config)
+      (org-babel-load-file emacs-org)
+    (load emacs-config))
+  (load custom-file 'noerrror)
+  (load emacs-email 'noerror))

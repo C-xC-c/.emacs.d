@@ -27,6 +27,9 @@
 ;; I read somewhere that Company breaks things?
 (add-hook 'org-mode-hook 'company-mode)
 
+;; Don't indent whole file with org-mode
+(eval-after-load "org-mode" (local-set-key (kbd "s-i") nil))
+
 (setq org-structure-template-alist
       (append
        '(("el" "#+BEGIN_SRC emacs-lisp\n?\n#+END_SRC")
@@ -57,7 +60,7 @@
 
 (add-hook 'org-mode-hook (local-keybind "C-c C-l" manx/org-insert-link))
 
-(tool-bar-mode -1)
+1(tool-bar-mode -1)
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 (line-number-mode 1)
@@ -302,7 +305,7 @@ the checking happens for all pairs in auto-minor-mode-alist"
 	    (funcall (cdar alist) 1))
 	(setq alist (cdr alist))))))
 
-(add-hook 'find-file-hook #'enable-minor-mode-based-on-extension)
+(add-hook 'find-file-hook#'enable-minor-mode-based-on-extension)
 
 (define-minor-mode sensitive-minor-mode
   "For sensitive files like password lists.
@@ -334,5 +337,3 @@ Null prefix argument turns off the mode."
 	  (lambda ()
 	    (push
 	     '("lambdainteractive" . ?Λ) prettify-symbols-alist)))
-
-(load "~/.emacs.d/email.el")
