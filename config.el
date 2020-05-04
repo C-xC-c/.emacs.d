@@ -60,7 +60,7 @@
 
 (add-hook 'org-mode-hook (local-keybind "C-c C-l" manx/org-insert-link))
 
-1(tool-bar-mode -1)
+(tool-bar-mode -1)
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 (line-number-mode 1)
@@ -278,34 +278,32 @@
 
 (add-hook 'doc-view-mode-hook 'auto-revert-mode)
 
-(setq tab-width 2
-      indent-tabs-mode t)
-
-(defvaralias 'js-indent-level 'tab-width)
+(setq-default tab-width 2
+							indent-tabs-mode t)
 (defvaralias 'css-indent-offset 'tab-width)
 
 (defvar auto-minor-mode-alist ()
-  "Alist of filename patterns vs correpsonding minor mode functions, see `auto-mode-alist'
+	"Alist of filename patterns vs correpsonding minor mode functions, see `auto-mode-alist'
 All elements of this alist are checked, meaning you can enable multiple minor modes for the same regexp.")
 
 (defun enable-minor-mode-based-on-extension ()
-  "Check file name against `auto-minor-mode-alist' to enable minor modes
+	"Check file name against `auto-minor-mode-alist' to enable minor modes
 the checking happens for all pairs in auto-minor-mode-alist"
-  (when buffer-file-name
-    (let ((name (file-name-sans-versions buffer-file-name))
-	  (remote-id (file-remote-p buffer-file-name))
-	  (case-fold-search auto-mode-case-fold)
-	  (alist auto-minor-mode-alist))
-      ;; Remove remote file name identification.
-      (when (and (stringp remote-id)
+	(when buffer-file-name
+		(let ((name (file-name-sans-versions buffer-file-name))
+		(remote-id (file-remote-p buffer-file-name))
+		(case-fold-search auto-mode-case-fold)
+		(alist auto-minor-mode-alist))
+			;; Remove remote file name identification.
+			(when (and (stringp remote-id)
 		 (string-match-p (regexp-quote remote-id) name))
 	(setq name (substring name (match-end 0))))
-      (while (and alist (caar alist) (cdar alist))
+			(while (and alist (caar alist) (cdar alist))
 	(if (string-match-p (caar alist) name)
-	    (funcall (cdar alist) 1))
+			(funcall (cdar alist) 1))
 	(setq alist (cdr alist))))))
 
-(add-hook 'find-file-hook#'enable-minor-mode-based-on-extension)
+(add-hook 'find-file-hook #'enable-minor-mode-based-on-extension)
 
 (define-minor-mode sensitive-minor-mode
   "For sensitive files like password lists.

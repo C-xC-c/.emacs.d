@@ -22,7 +22,7 @@
  '(nginx-indent-tabs-mode t)
  '(package-selected-packages
    (quote
-    (benchmark-init alchemist elixir-mode nginx-mode ac-js2 pdf-tools yasnippet-snippets which-key use-package symon switch-window spacemacs-theme spaceline slime-company popup-kill-ring omnisharp keychain-environment js2-mode ido-vertical-mode hungry-delete exwm diminish dashboard company-auctex beacon avy)))
+    (benchmark-init alchemist elixir-mode nginx-mode yasnippet-snippets which-key use-package switch-window spacemacs-theme spaceline slime-company popup-kill-ring omnisharp keychain-environment ido-vertical-mode hungry-delete exwm diminish dashboard company-auctex beacon avy)))
  '(slime-lisp-implementations
    (quote
     ((sbcl
@@ -30,8 +30,8 @@
       :env
       ("SBCL_HOME=/usr/lib64/sbcl/")))) t)
  '(switch-window-increase 4 t)
- '(switch-window-input-style (quote minibuffer) t)
- '(switch-window-threshold 2 t))
+ '(switch-window-input-style (quote minibuffer))
+ '(switch-window-threshold 2))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
