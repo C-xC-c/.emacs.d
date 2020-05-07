@@ -95,13 +95,14 @@ sbcl is in a werid place on Gentoo.
 #+END_SRC
 ** spaceline
 #+BEGIN_SRC emacs-lisp
-  (use-package spaceline
-    :init
-    (require 'spaceline-config)
-    (spaceline-spacemacs-theme)
-    :config
-    (spaceline-toggle-buffer-size-off)
-    (setq powerline-default-seperator (quote arrow)))
+(use-package spaceline
+  :init
+  (require 'spaceline-config)
+  (spaceline-spacemacs-theme)
+  :config
+  (spaceline-toggle-buffer-size-off)
+  ;;This isn't set in :custom because it breaks the arrow.
+  (setq powerline-default-seperator 'arrow))
 #+END_SRC
 ** dashboard
 #+BEGIN_SRC emacs-lisp
@@ -223,11 +224,11 @@ Also saves config if open.
 #+END_SRC 
 ** Links
 #+BEGIN_SRC emacs-lisp
-  (definteractive manx/delete-org-link ()
-    (when (org-in-regexp org-bracket-link-regexp 1)
-      (apply 'delete-region (list (match-beginning 0) (match-end 0)))))
+(definteractive manx/delete-org-link ()
+  (when (org-in-regexp org-bracket-link-regexp 1)
+    (apply 'delete-region (list (match-beginning 0) (match-end 0)))))
 
-  (add-hook 'org-mode-hook (local-keybind "C-c o l" manx/delete-org-link))
+(add-hook 'org-mode-hook (local-keybind "C-c o l" manx/delete-org-link))
 #+END_SRC
 *** Inline Images
  #+BEGIN_SRC emacs-lisp
@@ -241,29 +242,29 @@ Also saves config if open.
  #+END_SRC
 * functions
 ** text
+*** kill
 #+BEGIN_SRC emacs-lisp
-  (definteractive manx/kill-word ()
-    (backward-word)
-    (kill-word 1))
+(definteractive manx/kill-line()
+  (move-beginning-of-line nil)
+  (kill-whole-line))
 
-  (definteractive manx/kill-line()
-    (move-beginning-of-line nil)
-    (kill-whole-line))
+(definteractive manx/format-whole-buffer()
+  (save-excursion
+    (indent-region (point-min) (point-max) nil)))
 
-  (definteractive manx/format-whole-buffer()
-    (save-excursion
-      (indent-region (point-min) (point-max) nil)))
-
-  (global-set-key (kbd "<M-right>") 'forward-whitespace)
-  (global-set-key (kbd "C-c r b") 'revert-buffer)
-  (global-set-key (kbd "C-c k w") 'manx/kill-word)
-  (global-set-key (kbd "C-c k l") 'manx/kill-line)
-  (global-set-key (kbd "s-i") 'manx/format-whole-buffer)
- #+END_SRC
+(global-set-key (kbd "C-c k l") 'manx/kill-line)
+(global-set-key (kbd "s-i") 'manx/format-whole-buffer)
+(global-set-key (kbd "C-c r b") 'revert-buffer)
+#+END_SRC
 ** buffers
 #+BEGIN_SRC emacs-lisp
-  (global-set-key (kbd "C-x k") (lambdainteractive () (kill-buffer (current-buffer))))
-  (global-set-key (kbd "C-M-s-k") (lambdainteractive () (mapc 'kill-buffer (buffer-list))))
+(definteractive manx/scratch-buffer ()
+   (switch-to-buffer (get-buffer-create "*scratch*"))
+   (lisp-interaction-mode))
+
+(global-set-key (kbd "C-c s b") 'manx/scratch-buffer)
+(global-set-key (kbd "C-x k") (lambdainteractive () (kill-buffer (current-buffer))))
+(global-set-key (kbd "C-M-s-k") (lambdainteractive () (mapc 'kill-buffer (buffer-list))))
 #+END_SRC
 ** frames
 *** transpose-frame
@@ -311,28 +312,30 @@ Also saves config if open.
 ** minor things
 Things for GUI and basic config, like electric pairs and highlighting
 parens.
+*** set
 #+BEGIN_SRC emacs-lisp
-  (line-number-mode 1)
-  (column-number-mode 1)
-  (display-battery-mode 1)
-  (show-paren-mode 1)
-  (electric-pair-mode t)
-  (global-hl-line-mode t)
+(line-number-mode 1)
+(column-number-mode 1)
+(display-battery-mode 1)
+(show-paren-mode 1)
+(electric-pair-mode 1)
+(global-hl-line-mode 1)
 
-  (tool-bar-mode -1)
-  (menu-bar-mode -1)
-  (scroll-bar-mode -1)
+(defalias 'yes-or-no-p 'y-or-n-p)
 
-  (defalias 'yes-or-no-p 'y-or-n-p)
+(setq scroll-conservatively 100
+      select-enable-clipboard t
+      vc-follow-symlinks t)
 
-  (setq scroll-conservatively 100
-        select-enable-clipboard t
-        vc-follow-symlinks t)
-
-  (setq backup-directory-alist
-        `(("." . ,(concat user-emacs-directory "autosaves"))))
-
-  (global-unset-key (kbd "C-z")) ;; Fuck unix
+(setq backup-directory-alist
+      `(("." . ,(concat user-emacs-directory "autosaves"))))
+#+END_SRC
+*** unset
+#+BEGIN_SRC emacs-lisp
+(tool-bar-mode -1)
+(menu-bar-mode -1)
+(scroll-bar-mode -1)
+(global-unset-key (kbd "C-z")) ;; Fuck unix
 #+END_SRC
 ** indentation
 tabs > spaces. Except in Lisp.

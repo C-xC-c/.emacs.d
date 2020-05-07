@@ -1,9 +1,0 @@
-# -*- mode: snippet -*-
-# name: tabularx
-# key: tabx
-# --
-\begin{tabularx}{\textwidth}{${1:|c|}}
-  \hline
-  $0
-  \hline
-\end{tabularx}

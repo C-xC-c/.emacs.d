@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: wah
-# key: w
-# --
-(wah $0)

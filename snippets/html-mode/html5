@@ -1,5 +1,6 @@
 # -*- mode: snippet -*-
-# name: DOCTYPE html
+# name: <!DOCTYPE html>
 # key: 5
+# contributor : Manx <boku@plum.moe>
 # --
 <!DOCTYPE html>

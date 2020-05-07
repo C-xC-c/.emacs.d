@@ -1,5 +1,6 @@
 # -*- mode: snippet -*-
-# name: css
+# name: <link href=\"...\" rel=\"stylesheet\"...
 # key: css
+# contributor : Manx <boku@plum.moe>
 # --
 <link href="${1:style.css}" rel="stylesheet" type="text/css">$0

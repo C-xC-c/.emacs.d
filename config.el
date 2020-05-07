@@ -66,7 +66,8 @@
   (spaceline-spacemacs-theme)
   :config
   (spaceline-toggle-buffer-size-off)
-  (setq powerline-default-seperator (quote arrow)))
+  ;;This isn't set in :custom because it breaks the arrow.
+  (setq powerline-default-seperator 'arrow))
 
 (use-package dashboard
   :diminish (dashboard-mode page-break-lines-mode)
@@ -173,10 +174,6 @@
 
 (add-hook 'org-mode-hook (local-keybind "C-c C-l" manx/org-insert-link))
 
-(definteractive manx/kill-word ()
-  (backward-word)
-  (kill-word 1))
-
 (definteractive manx/kill-line()
   (move-beginning-of-line nil)
   (kill-whole-line))
@@ -185,12 +182,15 @@
   (save-excursion
     (indent-region (point-min) (point-max) nil)))
 
-(global-set-key (kbd "<M-right>") 'forward-whitespace)
-(global-set-key (kbd "C-c r b") 'revert-buffer)
-(global-set-key (kbd "C-c k w") 'manx/kill-word)
 (global-set-key (kbd "C-c k l") 'manx/kill-line)
 (global-set-key (kbd "s-i") 'manx/format-whole-buffer)
+(global-set-key (kbd "C-c r b") 'revert-buffer)
 
+(definteractive manx/scratch-buffer ()
+   (switch-to-buffer (get-buffer-create "*scratch*"))
+   (lisp-interaction-mode))
+
+(global-set-key (kbd "C-c s b") 'manx/scratch-buffer)
 (global-set-key (kbd "C-x k") (lambdainteractive () (kill-buffer (current-buffer))))
 (global-set-key (kbd "C-M-s-k") (lambdainteractive () (mapc 'kill-buffer (buffer-list))))
 
@@ -231,12 +231,8 @@
 (column-number-mode 1)
 (display-battery-mode 1)
 (show-paren-mode 1)
-(electric-pair-mode t)
-(global-hl-line-mode t)
-
-(tool-bar-mode -1)
-(menu-bar-mode -1)
-(scroll-bar-mode -1)
+(electric-pair-mode 1)
+(global-hl-line-mode 1)
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 
@@ -247,6 +243,9 @@
 (setq backup-directory-alist
       `(("." . ,(concat user-emacs-directory "autosaves"))))
 
+(tool-bar-mode -1)
+(menu-bar-mode -1)
+(scroll-bar-mode -1)
 (global-unset-key (kbd "C-z")) ;; Fuck unix
 
 (setq-default tab-width 2
