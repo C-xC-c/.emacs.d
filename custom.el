@@ -9,8 +9,8 @@
  '(company-minimum-prefix-length 3)
  '(custom-enabled-themes (quote (spacemacs-dark)))
  '(custom-safe-themes
-	 (quote
-		("bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" default)))
+   (quote
+    ("bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" default)))
  '(dashboard-banner-logo-title "Komacs")
  '(dashboard-center-content t)
  '(dashboard-items (quote ((recents . 5))))
@@ -21,14 +21,14 @@
  '(nginx-indent-level 2)
  '(nginx-indent-tabs-mode t)
  '(package-selected-packages
-	 (quote
-		(htmlize benchmark-init alchemist elixir-mode nginx-mode yasnippet-snippets which-key use-package switch-window spacemacs-theme spaceline slime-company popup-kill-ring omnisharp keychain-environment ido-vertical-mode hungry-delete exwm diminish dashboard company-auctex beacon avy)))
+   (quote
+    (htmlize benchmark-init alchemist elixir-mode nginx-mode yasnippet-snippets which-key use-package switch-window spacemacs-theme spaceline slime-company popup-kill-ring omnisharp keychain-environment ido-vertical-mode hungry-delete exwm diminish dashboard company-auctex beacon avy)))
  '(slime-lisp-implementations
-	 (quote
-		((sbcl
-			("sbcl" "--core" "/usr/lib64/sbcl/sbcl.core")
-			:env
-			("SBCL_HOME=/usr/lib64/sbcl/")))) t)
+   (quote
+    ((sbcl
+      ("sbcl" "--core" "/usr/lib64/sbcl/sbcl.core")
+      :env
+      ("SBCL_HOME=/usr/lib64/sbcl/")))) t)
  '(switch-window-increase 4 t)
  '(switch-window-input-style (quote minibuffer))
  '(switch-window-threshold 2))
