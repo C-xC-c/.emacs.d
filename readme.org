@@ -1,5 +1,5 @@
 * Komacs
-My emacs config. [[./config.org]] contains any configuration I've done,
+My emacs config. [[./config.org][config.org]] contains any configuration I've done,
 which is loaded by org-babel on startup.
 
 I use [[https://github.com/jwiegley/use-package][use-package]] for package management, [[https://www.djcbsoftware.nl/code/mu/mu4e.html][mu4e]] for mail and

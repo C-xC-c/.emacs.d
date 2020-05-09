@@ -1,4 +1,5 @@
 * macros
+These are global macros used throughout my config file.
 ** definteractive
 Wrappers around functions and lambdas so I don't have to type
 (interactive) all the damn time
@@ -26,6 +27,10 @@ Always ensure packages are installed. Log to ~*Messages*~.
 #+BEGIN_SRC emacs-lisp
 (setq use-package-always-ensure t
       use-package-verbose t)
+#+END_SRC
+** auto-minor-mode
+#+BEGIN_SRC emacs-lisp
+(use-package auto-minor-mode)
 #+END_SRC
 ** diminish
 #+BEGIN_SRC emacs-lisp
@@ -62,11 +67,11 @@ Always ensure packages are installed. Log to ~*Messages*~.
 #+END_SRC
 *** nginx
 #+BEGIN_SRC emacs-lisp
-  (use-package nginx-mode
-    :custom
-    (nginx-indent-tabs-mode t)
-    (nginx-indent-level 2)
-    :config (add-to-list 'auto-mode-alist '("/nginx/sites-\\(?:available\\|enabled\\)/" . nginx-mode)))
+(use-package nginx-mode
+  :custom
+  (nginx-indent-tabs-mode t)
+  (nginx-indent-level 2)
+  :config (add-to-list 'auto-mode-alist '("/nginx/sites-\\(?:available\\|enabled\\)/" . nginx-mode)))
 #+END_SRC
 *** slime
 sbcl is in a werid place on Gentoo.
@@ -102,7 +107,8 @@ sbcl is in a werid place on Gentoo.
   :config
   (spaceline-toggle-buffer-size-off)
   ;;This isn't set in :custom because it breaks the arrow.
-  (setq powerline-default-seperator 'arrow))
+  (setq powerline-default-seperator 'arrow)
+  (add-hook 'after-init-hook 'spaceline-compile))
 #+END_SRC
 ** dashboard
 #+BEGIN_SRC emacs-lisp
@@ -142,13 +148,13 @@ sbcl is in a werid place on Gentoo.
      (yas-reload-all))
  #+END_SRC
 ** minor modes
-*** hungry delete
+*** hungry-delete
  #+BEGIN_SRC emacs-lisp
    (use-package hungry-delete
      :diminish 'hungry-delete-mode
      :config (global-hungry-delete-mode 1))
  #+END_SRC
-*** which key
+*** which-key
  #+BEGIN_SRC emacs-lisp
    (use-package which-key
       :diminish 'which-key-mode
@@ -165,7 +171,7 @@ sbcl is in a werid place on Gentoo.
     :diminish 'beacon-mode
     :config (beacon-mode 1))
  #+END_SRC
-*** popup kill ring
+*** popup-kill-ring
  #+BEGIN_SRC emacs-lisp
   (use-package popup-kill-ring
     :bind ("M-y" . popup-kill-ring))
@@ -242,7 +248,6 @@ Also saves config if open.
  #+END_SRC
 * functions
 ** text
-*** kill
 #+BEGIN_SRC emacs-lisp
 (definteractive manx/kill-line()
   (move-beginning-of-line nil)
@@ -255,6 +260,7 @@ Also saves config if open.
 (global-set-key (kbd "C-c k l") 'manx/kill-line)
 (global-set-key (kbd "s-i") 'manx/format-whole-buffer)
 (global-set-key (kbd "C-c r b") 'revert-buffer)
+(global-set-key (kbd "<M-right>") 'forward-whitespace)
 #+END_SRC
 ** buffers
 #+BEGIN_SRC emacs-lisp
@@ -264,7 +270,9 @@ Also saves config if open.
 
 (global-set-key (kbd "C-c s b") 'manx/scratch-buffer)
 (global-set-key (kbd "C-x k") (lambdainteractive () (kill-buffer (current-buffer))))
-(global-set-key (kbd "C-M-s-k") (lambdainteractive () (mapc 'kill-buffer (buffer-list))))
+(global-set-key (kbd "C-M-s-k") (lambdainteractive ()
+                                   (mapc 'kill-buffer (buffer-list))
+                                   (manx/scratch-buffer)))
 #+END_SRC
 ** frames
 *** transpose-frame
@@ -327,6 +335,9 @@ parens.
       select-enable-clipboard t
       vc-follow-symlinks t)
 
+(setq browse-url-browser-function 'browse-url-generic
+      browse-url-generic-program "basilisk")
+
 (setq backup-directory-alist
       `(("." . ,(concat user-emacs-directory "autosaves"))))
 #+END_SRC
@@ -335,6 +346,8 @@ parens.
 (tool-bar-mode -1)
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
+(setq visible-bell nil
+      ring-bell-function 'ignore)
 (global-unset-key (kbd "C-z")) ;; Fuck unix
 #+END_SRC
 ** indentation
@@ -348,43 +361,29 @@ tabs > spaces. Except in Lisp.
 (defvaralias 'css-indent-offset 'tab-width)
 (defvaralias 'js-indent-level 'tab-width)
 #+END_SRC
-** Prettify symbols
+** prettify symbols
 #+BEGIN_SRC emacs-lisp
-  (global-prettify-symbols-mode t)
-  (add-hook 'emacs-lisp-mode-hook
-            (lambda ()
-              (push
-               '("lambdainteractive" . ?Λ)
-               prettify-symbols-alist)))
-#+END_SRC
-* auto-minor-mode
-auto-mode-alist for minor modes.
+(global-prettify-symbols-mode t)
 
-For example, used with sensitive-mode to not create backups
-(path/to/file~) when creating yasnippets
-#+BEGIN_SRC emacs-lisp
-  (defvar auto-minor-mode-alist ()
-    "Alist of filename patterns vs correpsonding minor mode functions, see `auto-mode-alist'
-  All elements of this alist are checked, meaning you can enable multiple minor modes for the same regexp.")
+(defmacro manx/prettify (lst)
+  `(add-hook (quote ,(car lst))
+             (lambda ()
+               (mapc (lambda (pair) (push pair prettify-symbols-alist))
+                     (quote ,(cdr lst))))))
 
-  (defun enable-minor-mode-based-on-extension ()
-    "Check file name against `auto-minor-mode-alist' to enable minor modes
-  the checking happens for all pairs in auto-minor-mode-alist"
-    (when buffer-file-name
-      (let ((name (file-name-sans-versions buffer-file-name))
-            (remote-id (file-remote-p buffer-file-name))
-            (case-fold-search auto-mode-case-fold)
-            (alist auto-minor-mode-alist))
-        ;; Remove remote file name identification.
-        (when (and (stringp remote-id)
-                   (string-match-p (regexp-quote remote-id) name))
-          (setq name (substring name (match-end 0))))
-        (while (and alist (caar alist) (cdar alist))
-          (if (string-match-p (caar alist) name)
-              (funcall (cdar alist) 1))
-          (setq alist (cdr alist))))))
+(manx/prettify
+ (emacs-lisp-mode-hook
+  ("lambdainteractive" . ?Λ)))
 
-  (add-hook 'find-file-hook #'enable-minor-mode-based-on-extension)
+(manx/prettify
+ (prog-mode-hook
+  ("||" . ?∨)
+  ("&&" . ?∧)
+  ("!=" . ?≠)))
+
+(manx/prettify
+ (js-mode-hook
+  ("=>" . ?⇒)))
 #+END_SRC
 * sensitive-minor-mode
 #+BEGIN_SRC emacs-lisp
@@ -411,6 +410,6 @@ For example, used with sensitive-mode to not create backups
         (append
          '(("stream/manifest/.*\\.json$" . sensitive-minor-mode)
            (".emacs.d/snippets/\\*$" . sensitive-minor-mode)
-           ("nginx/sites-(enabled|available)/*" . sensitive-minor-mode))
+           ("/etc/nginx/*" . sensitive-minor-mode))
          auto-minor-mode-alist))
 #+END_SRC

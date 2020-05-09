@@ -12,6 +12,8 @@
 (setq use-package-always-ensure t
       use-package-verbose t)
 
+(use-package auto-minor-mode)
+
 (use-package diminish)
 
 (use-package company
@@ -67,7 +69,8 @@
   :config
   (spaceline-toggle-buffer-size-off)
   ;;This isn't set in :custom because it breaks the arrow.
-  (setq powerline-default-seperator 'arrow))
+  (setq powerline-default-seperator 'arrow)
+  (add-hook 'after-init-hook 'spaceline-compile))
 
 (use-package dashboard
   :diminish (dashboard-mode page-break-lines-mode)
@@ -185,6 +188,7 @@
 (global-set-key (kbd "C-c k l") 'manx/kill-line)
 (global-set-key (kbd "s-i") 'manx/format-whole-buffer)
 (global-set-key (kbd "C-c r b") 'revert-buffer)
+(global-set-key (kbd "<M-right>") 'forward-whitespace)
 
 (definteractive manx/scratch-buffer ()
    (switch-to-buffer (get-buffer-create "*scratch*"))
@@ -192,7 +196,9 @@
 
 (global-set-key (kbd "C-c s b") 'manx/scratch-buffer)
 (global-set-key (kbd "C-x k") (lambdainteractive () (kill-buffer (current-buffer))))
-(global-set-key (kbd "C-M-s-k") (lambdainteractive () (mapc 'kill-buffer (buffer-list))))
+(global-set-key (kbd "C-M-s-k") (lambdainteractive ()
+                                   (mapc 'kill-buffer (buffer-list))
+                                   (manx/scratch-buffer)))
 
 ;; This is only used here for now but we should still more it some
 ;; time
@@ -240,12 +246,17 @@
       select-enable-clipboard t
       vc-follow-symlinks t)
 
+(setq browse-url-browser-function 'browse-url-generic
+      browse-url-generic-program "basilisk")
+
 (setq backup-directory-alist
       `(("." . ,(concat user-emacs-directory "autosaves"))))
 
 (tool-bar-mode -1)
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
+(setq visible-bell nil
+      ring-bell-function 'ignore)
 (global-unset-key (kbd "C-z")) ;; Fuck unix
 
 (setq-default tab-width 2
@@ -257,34 +268,26 @@
 (defvaralias 'js-indent-level 'tab-width)
 
 (global-prettify-symbols-mode t)
-(add-hook 'emacs-lisp-mode-hook
-          (lambda ()
-            (push
-             '("lambdainteractive" . ?Λ)
-             prettify-symbols-alist)))
 
-(defvar auto-minor-mode-alist ()
-  "Alist of filename patterns vs correpsonding minor mode functions, see `auto-mode-alist'
-All elements of this alist are checked, meaning you can enable multiple minor modes for the same regexp.")
+(defmacro manx/prettify (lst)
+  `(add-hook (quote ,(car lst))
+             (lambda ()
+               (mapc (lambda (pair) (push pair prettify-symbols-alist))
+                     (quote ,(cdr lst))))))
 
-(defun enable-minor-mode-based-on-extension ()
-  "Check file name against `auto-minor-mode-alist' to enable minor modes
-the checking happens for all pairs in auto-minor-mode-alist"
-  (when buffer-file-name
-    (let ((name (file-name-sans-versions buffer-file-name))
-          (remote-id (file-remote-p buffer-file-name))
-          (case-fold-search auto-mode-case-fold)
-          (alist auto-minor-mode-alist))
-      ;; Remove remote file name identification.
-      (when (and (stringp remote-id)
-                 (string-match-p (regexp-quote remote-id) name))
-        (setq name (substring name (match-end 0))))
-      (while (and alist (caar alist) (cdar alist))
-        (if (string-match-p (caar alist) name)
-            (funcall (cdar alist) 1))
-        (setq alist (cdr alist))))))
+(manx/prettify
+ (emacs-lisp-mode-hook
+  ("lambdainteractive" . ?Λ)))
 
-(add-hook 'find-file-hook #'enable-minor-mode-based-on-extension)
+(manx/prettify
+ (prog-mode-hook
+  ("||" . ?∨)
+  ("&&" . ?∧)
+  ("!=" . ?≠)))
+
+(manx/prettify
+ (js-mode-hook
+  ("=>" . ?⇒)))
 
 (define-minor-mode sensitive-minor-mode
   "For sensitive files like password lists.
@@ -309,5 +312,5 @@ Null prefix argument turns off the mode."
       (append
        '(("stream/manifest/.*\\.json$" . sensitive-minor-mode)
          (".emacs.d/snippets/\\*$" . sensitive-minor-mode)
-         ("nginx/sites-(enabled|available)/*" . sensitive-minor-mode))
+         ("/etc/nginx/*" . sensitive-minor-mode))
        auto-minor-mode-alist))

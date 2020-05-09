@@ -22,7 +22,7 @@
  '(nginx-indent-tabs-mode t)
  '(package-selected-packages
    (quote
-    (htmlize benchmark-init alchemist elixir-mode nginx-mode yasnippet-snippets which-key use-package switch-window spacemacs-theme spaceline slime-company popup-kill-ring omnisharp keychain-environment ido-vertical-mode hungry-delete exwm diminish dashboard company-auctex beacon avy)))
+    (auto-minor-mode htmlize alchemist elixir-mode nginx-mode yasnippet-snippets which-key use-package switch-window spacemacs-theme spaceline slime-company popup-kill-ring omnisharp keychain-environment ido-vertical-mode hungry-delete diminish dashboard company-auctex beacon avy)))
  '(slime-lisp-implementations
    (quote
     ((sbcl
