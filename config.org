@@ -28,6 +28,12 @@ Always ensure packages are installed. Log to ~*Messages*~.
 (setq use-package-always-ensure t
       use-package-verbose t)
 #+END_SRC
+** keychain-environment
+#+BEGIN_SRC emacs-lisp
+  (use-package keychain-environment
+    :bind ("C-c r e" . 'keychain-refresh-environment)
+    :init (keychain-refresh-environment))
+#+END_SRC
 ** auto-minor-mode
 #+BEGIN_SRC emacs-lisp
 (use-package auto-minor-mode)
@@ -88,28 +94,23 @@ sbcl is in a werid place on Gentoo.
     (add-hook 'lisp-mode-hook 'slime-mode)
     (slime-setup '(slime-fancy slime-company)))
 #+END_SRC
-** keychain-environment
-#+BEGIN_SRC emacs-lisp
-  (use-package keychain-environment
-    :bind ("C-c r e" . 'keychain-refresh-environment)
-    :init (keychain-refresh-environment))
-#+END_SRC
-** htmlize
+*** htmlize
 #+BEGIN_SRC emacs-lisp
   (use-package htmlize)
 #+END_SRC
-** spaceline
-#+BEGIN_SRC emacs-lisp
-(use-package spaceline
-  :init
-  (require 'spaceline-config)
-  (spaceline-spacemacs-theme)
-  :config
-  (spaceline-toggle-buffer-size-off)
-  ;;This isn't set in :custom because it breaks the arrow.
-  (setq powerline-default-seperator 'arrow)
-  (add-hook 'after-init-hook 'spaceline-compile))
-#+END_SRC
+** yasnippet
+ #+BEGIN_SRC emacs-lisp
+   (use-package yasnippet
+     :diminish 'yas-minor-mode
+     :hook ((html-mode
+             LaTeX-mode
+             emacs-lisp-mode
+             lisp-mode)
+            . yas-minor-mode)
+     :init ;; These are computationally expensive, so init.
+     (use-package yasnippet-snippets)
+     (yas-reload-all))
+ #+END_SRC
 ** dashboard
 #+BEGIN_SRC emacs-lisp
   (use-package dashboard
@@ -125,7 +126,16 @@ sbcl is in a werid place on Gentoo.
 
   (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
 #+END_SRC
-** switch window
+** windows and frames
+*** transpose-frame
+#+BEGIN_SRC emacs-lisp
+(use-package transpose-frame
+  :ensure t
+  :bind (("C-c f t" . transpose-frame)
+         ("C-c f i" . flip-frame)
+         ("C-c f o" . flop-frame)))
+#+END_SRC
+*** switch window
 #+BEGIN_SRC emacs-lisp
   (use-package switch-window
     :custom
@@ -134,19 +144,31 @@ sbcl is in a werid place on Gentoo.
     (switch-window-threshold 2)
     :bind ([remap other-window] . switch-window))
 #+END_SRC
-** yasnippet
- #+BEGIN_SRC emacs-lisp
-   (use-package yasnippet
-     :diminish 'yas-minor-mode
-     :hook ((html-mode
-             LaTeX-mode
-             emacs-lisp-mode
-             lisp-mode)
-            . yas-minor-mode)
-     :init ;; These are computationally expensive, so init.
-     (use-package yasnippet-snippets)
-     (yas-reload-all))
- #+END_SRC
+*** ido
+#+BEGIN_SRC emacs-lisp
+  (setq ido-enable-flex-matching t
+        ido-create-new-buffer 'always
+        ido-everywhere 1)
+
+  (use-package ido-vertical-mode
+    :bind ("C-l" . 'ido-reread-directory)
+    :custom (ido-vertical-define-keys 'C-n-and-C-p-only)
+    :config
+    (ido-vertical-mode 1)
+    (ido-mode 1))
+#+END_SRC
+*** spaceline
+#+BEGIN_SRC emacs-lisp
+(use-package spaceline
+  :init
+  (require 'spaceline-config)
+  (spaceline-spacemacs-theme)
+  :config
+  (spaceline-toggle-buffer-size-off)
+  ;;This isn't set in :custom because it breaks the arrow.
+  (setq powerline-default-seperator 'arrow)
+  (add-hook 'after-init-hook 'spaceline-compile))
+#+END_SRC
 ** minor modes
 *** hungry-delete
  #+BEGIN_SRC emacs-lisp
@@ -176,30 +198,17 @@ sbcl is in a werid place on Gentoo.
   (use-package popup-kill-ring
     :bind ("M-y" . popup-kill-ring))
  #+END_SRC
-** ido
-#+BEGIN_SRC emacs-lisp
-  (setq ido-enable-flex-matching t
-        ido-create-new-buffer 'always
-        ido-everywhere 1)
-
-  (use-package ido-vertical-mode
-    :bind ("C-l" . 'ido-reread-directory)
-    :custom (ido-vertical-define-keys 'C-n-and-C-p-only)
-    :config
-    (ido-vertical-mode 1)
-    (ido-mode 1))
-#+END_SRC
 * org
 ** edit/reload config 
-Also saves config if open.
+Also saves config if open. manx/emacs-org is defined in [[./init.el][init.el]]
 #+BEGIN_SRC emacs-lisp
-  (definteractive manx/config-reload ()
-    (when (get-buffer "config.org")
-      (with-current-buffer "config.org" (save-buffer)))
-    (org-babel-load-file (concat user-emacs-directory "config.org")))
+(definteractive manx/config-reload ()
+  (when (get-buffer "config.org")
+    (with-current-buffer "config.org" (save-buffer)))
+  (org-babel-load-file manx/emacs-org))
 
-  (global-set-key (kbd "C-c x r") 'manx/config-reload)
-  (global-set-key (kbd "C-c x e") (lambdainteractive () (find-file (concat user-emacs-directory "config.org"))))
+(global-set-key (kbd "C-c x r") 'manx/config-reload)
+(global-set-key (kbd "C-c x e") (lambdainteractive () (find-file manx/emacs-org)))
 #+END_SRC
 ** misc
 #+BEGIN_SRC emacs-lisp
@@ -265,37 +274,28 @@ Also saves config if open.
 ** buffers
 #+BEGIN_SRC emacs-lisp
 (definteractive manx/scratch-buffer ()
-   (switch-to-buffer (get-buffer-create "*scratch*"))
-   (lisp-interaction-mode))
+  (switch-to-buffer (get-buffer-create "*scratch*"))
+  (lisp-interaction-mode))
 
 (global-set-key (kbd "C-c s b") 'manx/scratch-buffer)
 (global-set-key (kbd "C-x k") (lambdainteractive () (kill-buffer (current-buffer))))
-(global-set-key (kbd "C-M-s-k") (lambdainteractive ()
-                                   (mapc 'kill-buffer (buffer-list))
-                                   (manx/scratch-buffer)))
+(global-set-key (kbd "C-M-s-k")
+                (lambdainteractive ()
+                   (mapc 'kill-buffer (buffer-list))
+                   (manx/scratch-buffer)))
 #+END_SRC
 ** frames
-*** transpose-frame
  #+BEGIN_SRC emacs-lisp
-  ;; This is only used here for now but we should still more it some
-  ;; time
-  (add-to-list 'load-path "~/.emacs.d/scripts/")
+ (defmacro manx/split-and-follow (direction)
+	 `(progn
+			,direction
+		 (balance-windows)
+		 (other-window 1)))
 
-  (require 'transpose-frame)
-  (global-set-key (kbd "C-c f t") 'transpose-frame)
-  (global-set-key (kbd "C-c f i") 'flip-frame)
-  (global-set-key (kbd "C-c f o") 'flop-frame)
- #+END_SRC
-*** split and follow
- #+BEGIN_SRC emacs-lisp
-  (defmacro manx/split-and-follow (direction)
-    `(progn
-       ,direction
-      (balance-windows)
-      (other-window 1)))
-
-  (global-set-key (kbd "C-x 3") (lambdainteractive () (manx/split-and-follow (split-window-below))))
-  (global-set-key (kbd "C-x 2") (lambdainteractive () (manx/split-and-follow (split-window-horizontally))))
+ (global-set-key (kbd "C-x 3")
+								 (lambdainteractive () (manx/split-and-follow (split-window-below))))
+ (global-set-key (kbd "C-x 2")
+								 (lambdainteractive () (manx/split-and-follow (split-window-horizontally))))
  #+END_SRC
 * misc
 ** unix line endings
@@ -346,8 +346,10 @@ parens.
 (tool-bar-mode -1)
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
+
 (setq visible-bell nil
       ring-bell-function 'ignore)
+
 (global-unset-key (kbd "C-z")) ;; Fuck unix
 #+END_SRC
 ** indentation
@@ -366,10 +368,11 @@ tabs > spaces. Except in Lisp.
 (global-prettify-symbols-mode t)
 
 (defmacro manx/prettify (lst)
-  `(add-hook (quote ,(car lst))
-             (lambda ()
-               (mapc (lambda (pair) (push pair prettify-symbols-alist))
-                     (quote ,(cdr lst))))))
+  `(add-hook
+    (quote ,(car lst))
+    (lambda ()
+      (dolist (pair (quote ,(cdr lst)))
+        (push pair prettify-symbols-alist)))))
 
 (manx/prettify
  (emacs-lisp-mode-hook

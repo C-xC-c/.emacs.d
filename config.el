@@ -12,6 +12,10 @@
 (setq use-package-always-ensure t
       use-package-verbose t)
 
+(use-package keychain-environment
+  :bind ("C-c r e" . 'keychain-refresh-environment)
+  :init (keychain-refresh-environment))
+
 (use-package auto-minor-mode)
 
 (use-package diminish)
@@ -56,21 +60,18 @@
   (add-hook 'lisp-mode-hook 'slime-mode)
   (slime-setup '(slime-fancy slime-company)))
 
-(use-package keychain-environment
-  :bind ("C-c r e" . 'keychain-refresh-environment)
-  :init (keychain-refresh-environment))
-
 (use-package htmlize)
 
-(use-package spaceline
-  :init
-  (require 'spaceline-config)
-  (spaceline-spacemacs-theme)
-  :config
-  (spaceline-toggle-buffer-size-off)
-  ;;This isn't set in :custom because it breaks the arrow.
-  (setq powerline-default-seperator 'arrow)
-  (add-hook 'after-init-hook 'spaceline-compile))
+(use-package yasnippet
+  :diminish 'yas-minor-mode
+  :hook ((html-mode
+          LaTeX-mode
+          emacs-lisp-mode
+          lisp-mode)
+         . yas-minor-mode)
+  :init ;; These are computationally expensive, so init.
+  (use-package yasnippet-snippets)
+  (yas-reload-all))
 
 (use-package dashboard
   :diminish (dashboard-mode page-break-lines-mode)
@@ -85,6 +86,12 @@
 
 (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
 
+(use-package transpose-frame
+  :ensure t
+  :bind (("C-c f t" . transpose-frame)
+         ("C-c f i" . flip-frame)
+         ("C-c f o" . flop-frame)))
+
 (use-package switch-window
   :custom
   (switch-window-input-style 'minibuffer)
@@ -92,16 +99,26 @@
   (switch-window-threshold 2)
   :bind ([remap other-window] . switch-window))
 
-(use-package yasnippet
-  :diminish 'yas-minor-mode
-  :hook ((html-mode
-          LaTeX-mode
-          emacs-lisp-mode
-          lisp-mode)
-         . yas-minor-mode)
-  :init ;; These are computationally expensive, so init.
-  (use-package yasnippet-snippets)
-  (yas-reload-all))
+(setq ido-enable-flex-matching t
+      ido-create-new-buffer 'always
+      ido-everywhere 1)
+
+(use-package ido-vertical-mode
+  :bind ("C-l" . 'ido-reread-directory)
+  :custom (ido-vertical-define-keys 'C-n-and-C-p-only)
+  :config
+  (ido-vertical-mode 1)
+  (ido-mode 1))
+
+(use-package spaceline
+  :init
+  (require 'spaceline-config)
+  (spaceline-spacemacs-theme)
+  :config
+  (spaceline-toggle-buffer-size-off)
+  ;;This isn't set in :custom because it breaks the arrow.
+  (setq powerline-default-seperator 'arrow)
+  (add-hook 'after-init-hook 'spaceline-compile))
 
 (use-package hungry-delete
   :diminish 'hungry-delete-mode
@@ -121,24 +138,13 @@
 (use-package popup-kill-ring
   :bind ("M-y" . popup-kill-ring))
 
-(setq ido-enable-flex-matching t
-      ido-create-new-buffer 'always
-      ido-everywhere 1)
-
-(use-package ido-vertical-mode
-  :bind ("C-l" . 'ido-reread-directory)
-  :custom (ido-vertical-define-keys 'C-n-and-C-p-only)
-  :config
-  (ido-vertical-mode 1)
-  (ido-mode 1))
-
 (definteractive manx/config-reload ()
   (when (get-buffer "config.org")
     (with-current-buffer "config.org" (save-buffer)))
-  (org-babel-load-file (concat user-emacs-directory "config.org")))
+  (org-babel-load-file manx/emacs-org))
 
 (global-set-key (kbd "C-c x r") 'manx/config-reload)
-(global-set-key (kbd "C-c x e") (lambdainteractive () (find-file (concat user-emacs-directory "config.org"))))
+(global-set-key (kbd "C-c x e") (lambdainteractive () (find-file manx/emacs-org)))
 
 (setq org-src-window-setup 'current-window)
 
@@ -191,32 +197,26 @@
 (global-set-key (kbd "<M-right>") 'forward-whitespace)
 
 (definteractive manx/scratch-buffer ()
-   (switch-to-buffer (get-buffer-create "*scratch*"))
-   (lisp-interaction-mode))
+  (switch-to-buffer (get-buffer-create "*scratch*"))
+  (lisp-interaction-mode))
 
 (global-set-key (kbd "C-c s b") 'manx/scratch-buffer)
 (global-set-key (kbd "C-x k") (lambdainteractive () (kill-buffer (current-buffer))))
-(global-set-key (kbd "C-M-s-k") (lambdainteractive ()
-                                   (mapc 'kill-buffer (buffer-list))
-                                   (manx/scratch-buffer)))
-
-;; This is only used here for now but we should still more it some
-;; time
-(add-to-list 'load-path "~/.emacs.d/scripts/")
-
-(require 'transpose-frame)
-(global-set-key (kbd "C-c f t") 'transpose-frame)
-(global-set-key (kbd "C-c f i") 'flip-frame)
-(global-set-key (kbd "C-c f o") 'flop-frame)
+(global-set-key (kbd "C-M-s-k")
+                (lambdainteractive ()
+                   (mapc 'kill-buffer (buffer-list))
+                   (manx/scratch-buffer)))
 
 (defmacro manx/split-and-follow (direction)
-  `(progn
-     ,direction
-    (balance-windows)
-    (other-window 1)))
+	`(progn
+		       ,direction
+		(balance-windows)
+		(other-window 1)))
 
-(global-set-key (kbd "C-x 3") (lambdainteractive () (manx/split-and-follow (split-window-below))))
-(global-set-key (kbd "C-x 2") (lambdainteractive () (manx/split-and-follow (split-window-horizontally))))
+(global-set-key (kbd "C-x 3")
+								(lambdainteractive () (manx/split-and-follow (split-window-below))))
+(global-set-key (kbd "C-x 2")
+								(lambdainteractive () (manx/split-and-follow (split-window-horizontally))))
 
 (defun unix-line-ends ()
   (when (string-match
@@ -255,8 +255,10 @@
 (tool-bar-mode -1)
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
+
 (setq visible-bell nil
       ring-bell-function 'ignore)
+
 (global-unset-key (kbd "C-z")) ;; Fuck unix
 
 (setq-default tab-width 2
@@ -272,8 +274,8 @@
 (defmacro manx/prettify (lst)
   `(add-hook (quote ,(car lst))
              (lambda ()
-               (mapc (lambda (pair) (push pair prettify-symbols-alist))
-                     (quote ,(cdr lst))))))
+               (dolist (pair (quote ,(cdr lst)))
+                 (push pair prettify-symbols-alist)))))
 
 (manx/prettify
  (emacs-lisp-mode-hook
