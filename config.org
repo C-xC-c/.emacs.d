@@ -6,20 +6,20 @@ Wrappers around functions and lambdas so I don't have to type
 
 I have ~prettify-symbols-mode~ set ~lambdainteractive~ to Λ (capital lambda) because it's cute.
 #+BEGIN_SRC emacs-lisp
-  (defmacro definteractive (name &rest body)
-    `(defun ,name ,(car body)
-       (interactive)
-       ,@(cdr body)))
+(defmacro definteractive (name &rest body)
+  `(defun ,name ,(car body)
+     (interactive)
+     ,@(cdr body)))
 
-  (defmacro lambdainteractive (&rest body)
-    `(lambda ,(car body) (interactive) ,@(cdr body)))
+(defmacro lambdainteractive (&rest body)
+  `(lambda ,(car body) (interactive) ,@(cdr body)))
 #+END_SRC
 ** local-keybind
 Hide unecessary lambda when calling (local-set-key) for org-mode
 functions
 #+BEGIN_SRC emacs-lisp
-  (defmacro local-keybind (key value)
-    `(lambda () (local-set-key (kbd ,key) (quote ,value))))
+(defmacro local-keybind (key value)
+  `(lambda () (local-set-key (kbd ,key) (quote ,value))))
 #+END_SRC
 * use-package
 ** use-package config
@@ -30,9 +30,9 @@ Always ensure packages are installed. Log to ~*Messages*~.
 #+END_SRC
 ** keychain-environment
 #+BEGIN_SRC emacs-lisp
-  (use-package keychain-environment
-    :bind ("C-c r e" . 'keychain-refresh-environment)
-    :init (keychain-refresh-environment))
+(use-package keychain-environment
+  :bind ("C-c r e" . 'keychain-refresh-environment)
+  :init (keychain-refresh-environment))
 #+END_SRC
 ** auto-minor-mode
 #+BEGIN_SRC emacs-lisp
@@ -40,36 +40,36 @@ Always ensure packages are installed. Log to ~*Messages*~.
 #+END_SRC
 ** diminish
 #+BEGIN_SRC emacs-lisp
-  (use-package diminish)
+(use-package diminish)
 #+END_SRC
 ** company
 #+BEGIN_SRC emacs-lisp
-  (use-package company
-    :diminish 'company-mode
-    :bind (:map company-mode-map
-    ("C-c /" . 'yas-expand))
-    :custom
-    (company-idle-delay 0)
-    (company-minimum-prefix-length 3)
-    :init (add-hook 'after-init-hook 'global-company-mode))
+(use-package company
+  :diminish 'company-mode
+  :bind (:map company-mode-map
+              ("C-c /" . 'yas-expand))
+  :custom
+  (company-idle-delay 0)
+  (company-minimum-prefix-length 3)
+  :init (add-hook 'after-init-hook 'global-company-mode))
 #+END_SRC
 ** prog
 *** c#
 #+BEGIN_SRC emacs-lisp
-  (use-package csharp-mode
+(use-package csharp-mode
+  :defer t
+  :config
+  (use-package omnisharp
     :defer t
     :config
-    (use-package omnisharp
-      :defer t
-      :config
-      (add-hook 'csharp-mode-hook 'omnisharp-mode)
-      (add-to-list 'company-backends 'company-omnisharp)))
+    (add-hook 'csharp-mode-hook 'omnisharp-mode)
+    (add-to-list 'company-backends 'company-omnisharp)))
 #+END_SRC
 *** elixir
 #+BEGIN_SRC emacs-lisp
-  (use-package elixir-mode
-    :defer t
-    :config (use-package alchemist))
+(use-package elixir-mode
+  :defer t
+  :config (use-package alchemist))
 #+END_SRC
 *** nginx
 #+BEGIN_SRC emacs-lisp
@@ -82,49 +82,49 @@ Always ensure packages are installed. Log to ~*Messages*~.
 *** slime
 sbcl is in a werid place on Gentoo.
 #+BEGIN_SRC emacs-lisp
-  (use-package slime
-    :defer t
-    :custom
-    (slime-lisp-implementations
-     '((sbcl ("sbcl" "--core" "/usr/lib64/sbcl/sbcl.core")
-             :env ("SBCL_HOME=/usr/lib64/sbcl/"))))
-    :diminish 'slime-mode
-    :init
-    (use-package slime-company)
-    (add-hook 'lisp-mode-hook 'slime-mode)
-    (slime-setup '(slime-fancy slime-company)))
+(use-package slime
+  :defer t
+  :custom
+  (slime-lisp-implementations
+   '((sbcl ("sbcl" "--core" "/usr/lib64/sbcl/sbcl.core")
+           :env ("SBCL_HOME=/usr/lib64/sbcl/"))))
+  :diminish 'slime-mode
+  :init
+  (use-package slime-company)
+  (add-hook 'lisp-mode-hook 'slime-mode)
+  (slime-setup '(slime-fancy slime-company)))
 #+END_SRC
 *** htmlize
 #+BEGIN_SRC emacs-lisp
-  (use-package htmlize)
+(use-package htmlize)
 #+END_SRC
 ** yasnippet
  #+BEGIN_SRC emacs-lisp
-   (use-package yasnippet
-     :diminish 'yas-minor-mode
-     :hook ((html-mode
-             LaTeX-mode
-             emacs-lisp-mode
-             lisp-mode)
-            . yas-minor-mode)
-     :init ;; These are computationally expensive, so init.
-     (use-package yasnippet-snippets)
-     (yas-reload-all))
+ (use-package yasnippet
+   :diminish 'yas-minor-mode
+   :hook ((html-mode
+           LaTeX-mode
+           emacs-lisp-mode
+           lisp-mode)
+          . yas-minor-mode)
+   :init ;; These are computationally expensive, so init.
+   (use-package yasnippet-snippets)
+   (yas-reload-all))
  #+END_SRC
 ** dashboard
 #+BEGIN_SRC emacs-lisp
-  (use-package dashboard
-    :diminish (dashboard-mode page-break-lines-mode)
-    :custom
-    (dashboard-center-content t)
-    (dashboard-banner-logo-title "Komacs")
-    (dashboard-set-init-info t)
-    (dashboard-startup-banner "~/.emacs.d/Komacs.png")
-    (dashboard-show-shortcuts nil)
-    (dashboard-items '((recents . 5)))
-    :config (dashboard-setup-startup-hook))
+(use-package dashboard
+  :diminish (dashboard-mode page-break-lines-mode)
+  :custom
+  (dashboard-center-content t)
+  (dashboard-banner-logo-title "Komacs")
+  (dashboard-set-init-info t)
+  (dashboard-startup-banner "~/.emacs.d/Komacs.png")
+  (dashboard-show-shortcuts nil)
+  (dashboard-items '((recents . 5)))
+  :config (dashboard-setup-startup-hook))
 
-  (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
+(setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
 #+END_SRC
 ** windows and frames
 *** transpose-frame
@@ -137,25 +137,25 @@ sbcl is in a werid place on Gentoo.
 #+END_SRC
 *** switch window
 #+BEGIN_SRC emacs-lisp
-  (use-package switch-window
-    :custom
-    (switch-window-input-style 'minibuffer)
-    (switch-window-increase 4)
-    (switch-window-threshold 2)
-    :bind ([remap other-window] . switch-window))
+(use-package switch-window
+  :custom
+  (switch-window-input-style 'minibuffer)
+  (switch-window-increase 4)
+  (switch-window-threshold 2)
+  :bind ([remap other-window] . switch-window))
 #+END_SRC
 *** ido
 #+BEGIN_SRC emacs-lisp
-  (setq ido-enable-flex-matching t
-        ido-create-new-buffer 'always
-        ido-everywhere 1)
+(setq ido-enable-flex-matching t
+      ido-create-new-buffer 'always
+      ido-everywhere 1)
 
-  (use-package ido-vertical-mode
-    :bind ("C-l" . 'ido-reread-directory)
-    :custom (ido-vertical-define-keys 'C-n-and-C-p-only)
-    :config
-    (ido-vertical-mode 1)
-    (ido-mode 1))
+(use-package ido-vertical-mode
+  :bind ("C-l" . 'ido-reread-directory)
+  :custom (ido-vertical-define-keys 'C-n-and-C-p-only)
+  :config
+  (ido-vertical-mode 1)
+  (ido-mode 1))
 #+END_SRC
 *** spaceline
 #+BEGIN_SRC emacs-lisp
@@ -172,31 +172,31 @@ sbcl is in a werid place on Gentoo.
 ** minor modes
 *** hungry-delete
  #+BEGIN_SRC emacs-lisp
-   (use-package hungry-delete
-     :diminish 'hungry-delete-mode
-     :config (global-hungry-delete-mode 1))
+ (use-package hungry-delete
+   :diminish 'hungry-delete-mode
+   :config (global-hungry-delete-mode 1))
  #+END_SRC
 *** which-key
  #+BEGIN_SRC emacs-lisp
-   (use-package which-key
-      :diminish 'which-key-mode
-      :config (which-key-mode))
+ (use-package which-key
+   :diminish 'which-key-mode
+   :config (which-key-mode))
  #+END_SRC
 *** avy
  #+BEGIN_SRC emacs-lisp
-  (use-package avy
-    :bind ("M-s" . avy-goto-char))
+ (use-package avy
+   :bind ("M-s" . avy-goto-char))
  #+END_SRC
 *** beacon
  #+BEGIN_SRC emacs-lisp
-  (use-package beacon
-    :diminish 'beacon-mode
-    :config (beacon-mode 1))
+ (use-package beacon
+   :diminish 'beacon-mode
+   :config (beacon-mode 1))
  #+END_SRC
 *** popup-kill-ring
  #+BEGIN_SRC emacs-lisp
-  (use-package popup-kill-ring
-    :bind ("M-y" . popup-kill-ring))
+ (use-package popup-kill-ring
+   :bind ("M-y" . popup-kill-ring))
  #+END_SRC
 * org
 ** edit/reload config 
@@ -223,19 +223,21 @@ Also saves config if open. manx/emacs-org is defined in [[./init.el][init.el]]
 (add-to-list 'org-structure-template-alist '("el" "#+BEGIN_SRC emacs-lisp\n?\n#+END_SRC"))
 
 (setq org-src-tab-acts-natively t
-      org-edit-src-content-indentation 0)
+      org-edit-src-content-indentation 0
+      org-src-preserve-indentation nil
+      org-agenda-files '("~/todo.org"))
 #+END_SRC
 ** html export
 #+BEGIN_SRC emacs-lisp
-  (setq org-html-doctype "html5")
+(setq org-html-doctype "html5")
 
-  (definteractive manx/save-org-to-html()
-    (when (equal major-mode 'org-mode)
-      (save-buffer)
-      (org-html-export-to-html)))
+(definteractive manx/save-org-to-html()
+  (when (equal major-mode 'org-mode)
+    (save-buffer)
+    (org-html-export-to-html)))
 
-  (add-hook 'org-mode-hook
-            (local-keybind "C-c s h" manx/save-org-to-html))
+(add-hook 'org-mode-hook
+          (local-keybind "C-c s h" manx/save-org-to-html))
 #+END_SRC 
 ** Links
 #+BEGIN_SRC emacs-lisp
@@ -247,13 +249,13 @@ Also saves config if open. manx/emacs-org is defined in [[./init.el][init.el]]
 #+END_SRC
 *** Inline Images
  #+BEGIN_SRC emacs-lisp
-   (setq org-image-actual-width 150)
+ (setq org-image-actual-width 150)
 
-   (definteractive manx/org-insert-link ()
-     (org-insert-link)
-     (org-redisplay-inline-images))
+ (definteractive manx/org-insert-link ()
+   (org-insert-link)
+   (org-redisplay-inline-images))
 
-   (add-hook 'org-mode-hook (local-keybind "C-c C-l" manx/org-insert-link))
+ (add-hook 'org-mode-hook (local-keybind "C-c C-l" manx/org-insert-link))
  #+END_SRC
 * functions
 ** text
@@ -277,45 +279,53 @@ Also saves config if open. manx/emacs-org is defined in [[./init.el][init.el]]
   (switch-to-buffer (get-buffer-create "*scratch*"))
   (lisp-interaction-mode))
 
+(definteractive manx/kill-all ()
+  (mapc 'kill-buffer (buffer-list))
+  (manx/scratch-buffer))
+
 (global-set-key (kbd "C-c s b") 'manx/scratch-buffer)
 (global-set-key (kbd "C-x k") (lambdainteractive () (kill-buffer (current-buffer))))
-(global-set-key (kbd "C-M-s-k")
-                (lambdainteractive ()
-                   (mapc 'kill-buffer (buffer-list))
-                   (manx/scratch-buffer)))
+(global-set-key (kbd "C-M-s-k") 'manx/kill-all)
 #+END_SRC
 ** frames
  #+BEGIN_SRC emacs-lisp
  (defmacro manx/split-and-follow (direction)
 	 `(progn
 			,direction
-		 (balance-windows)
-		 (other-window 1)))
+			(balance-windows)
+			(other-window 1)))
 
  (global-set-key (kbd "C-x 3")
 								 (lambdainteractive () (manx/split-and-follow (split-window-below))))
  (global-set-key (kbd "C-x 2")
 								 (lambdainteractive () (manx/split-and-follow (split-window-horizontally))))
  #+END_SRC
+** windows
+#+BEGIN_SRC emacs-lisp
+(definteractive manx/theme ()
+  "Themes don't load properly when using emacsclient"
+  (load-theme 'spacemacs-dark)
+  (spaceline-compile))
+#+END_SRC
 * misc
 ** unix line endings
 #+BEGIN_SRC emacs-lisp
-  (defun unix-line-ends ()
-    (when (string-match
-           "-\\(?:dos\\|mac\\)$"
-           (symbol-name buffer-file-coding-system))
-      (set-buffer-file-coding-system 'unix)))
+(defun unix-line-ends ()
+  (when (string-match
+         "-\\(?:dos\\|mac\\)$"
+         (symbol-name buffer-file-coding-system))
+    (set-buffer-file-coding-system 'unix)))
 
-  (add-hook 'find-file-hooks 'unix-line-ends)
+(add-hook 'find-file-hooks 'unix-line-ends)
 #+END_SRC
 ** UTF8
 #+BEGIN_SRC emacs-lisp
-  (setq locale-coding-system 'utf-8)
-  (set-terminal-coding-system 'utf-8)
-  (set-keyboard-coding-system 'utf-8)
-  (set-selection-coding-system 'utf-8)
-  (prefer-coding-system 'utf-8)
-  (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
+(setq locale-coding-system 'utf-8)
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+(set-selection-coding-system 'utf-8)
+(prefer-coding-system 'utf-8)
+(setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
 #+END_SRC
 ** minor things
 Things for GUI and basic config, like electric pairs and highlighting
@@ -390,29 +400,29 @@ tabs > spaces. Except in Lisp.
 #+END_SRC
 * sensitive-minor-mode
 #+BEGIN_SRC emacs-lisp
-  (define-minor-mode sensitive-minor-mode
-    "For sensitive files like password lists.
-  It disables backup creation and auto saving.
+(define-minor-mode sensitive-minor-mode
+  "For sensitive files like password lists.
+It disables backup creation and auto saving.
 
-  With no argument, this command toggles the mode.
-  Non-null prefix argument turns on the mode.
-  Null prefix argument turns off the mode."
-    :init-value nil
-    :lighter " Sensitive"
-    :keymap nil 
-    (if (symbol-value sensitive-minor-mode)
-        (progn
-          (setq make-backup-files nil)
-          (auto-save-mode -1))
-      (setq-local make-backup-files t)
-      (auto-save-mode 1)))
+With no argument, this command toggles the mode.
+Non-null prefix argument turns on the mode.
+Null prefix argument turns off the mode."
+  :init-value nil
+  :lighter " Sensitive"
+  :keymap nil 
+  (if (symbol-value sensitive-minor-mode)
+      (progn
+        (setq make-backup-files nil)
+        (auto-save-mode -1))
+    (setq-local make-backup-files t)
+    (auto-save-mode 1)))
 
 
-  ;; Regexps of sensitive files.
-  (setq auto-minor-mode-alist
-        (append
-         '(("stream/manifest/.*\\.json$" . sensitive-minor-mode)
-           (".emacs.d/snippets/\\*$" . sensitive-minor-mode)
-           ("/etc/nginx/*" . sensitive-minor-mode))
-         auto-minor-mode-alist))
+;; Regexps of sensitive files.
+(setq auto-minor-mode-alist
+      (append
+       '(("stream/manifest/.*\\.json$" . sensitive-minor-mode)
+         (".emacs.d/snippets/\\*$" . sensitive-minor-mode)
+         ("/etc/nginx/*" . sensitive-minor-mode))
+       auto-minor-mode-alist))
 #+END_SRC

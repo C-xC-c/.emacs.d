@@ -23,7 +23,7 @@
 (use-package company
   :diminish 'company-mode
   :bind (:map company-mode-map
-  ("C-c /" . 'yas-expand))
+              ("C-c /" . 'yas-expand))
   :custom
   (company-idle-delay 0)
   (company-minimum-prefix-length 3)
@@ -125,8 +125,8 @@
   :config (global-hungry-delete-mode 1))
 
 (use-package which-key
-   :diminish 'which-key-mode
-   :config (which-key-mode))
+  :diminish 'which-key-mode
+  :config (which-key-mode))
 
 (use-package avy
   :bind ("M-s" . avy-goto-char))
@@ -157,7 +157,9 @@
 (add-to-list 'org-structure-template-alist '("el" "#+BEGIN_SRC emacs-lisp\n?\n#+END_SRC"))
 
 (setq org-src-tab-acts-natively t
-      org-edit-src-content-indentation 0)
+      org-edit-src-content-indentation 0
+      org-src-preserve-indentation nil
+      org-agenda-files '("~/todo.org"))
 
 (setq org-html-doctype "html5")
 
@@ -200,23 +202,29 @@
   (switch-to-buffer (get-buffer-create "*scratch*"))
   (lisp-interaction-mode))
 
+(definteractive manx/kill-all ()
+  (mapc 'kill-buffer (buffer-list))
+  (manx/scratch-buffer))
+
 (global-set-key (kbd "C-c s b") 'manx/scratch-buffer)
 (global-set-key (kbd "C-x k") (lambdainteractive () (kill-buffer (current-buffer))))
-(global-set-key (kbd "C-M-s-k")
-                (lambdainteractive ()
-                   (mapc 'kill-buffer (buffer-list))
-                   (manx/scratch-buffer)))
+(global-set-key (kbd "C-M-s-k") 'manx/kill-all)
 
 (defmacro manx/split-and-follow (direction)
 	`(progn
-		       ,direction
-		(balance-windows)
-		(other-window 1)))
+		 ,direction
+		 (balance-windows)
+		 (other-window 1)))
 
 (global-set-key (kbd "C-x 3")
 								(lambdainteractive () (manx/split-and-follow (split-window-below))))
 (global-set-key (kbd "C-x 2")
 								(lambdainteractive () (manx/split-and-follow (split-window-horizontally))))
+
+(definteractive manx/theme ()
+  "Themes don't load properly when using emacsclient"
+  (load-theme 'spacemacs-dark)
+  (spaceline-compile))
 
 (defun unix-line-ends ()
   (when (string-match
@@ -272,10 +280,11 @@
 (global-prettify-symbols-mode t)
 
 (defmacro manx/prettify (lst)
-  `(add-hook (quote ,(car lst))
-             (lambda ()
-               (dolist (pair (quote ,(cdr lst)))
-                 (push pair prettify-symbols-alist)))))
+  `(add-hook
+    (quote ,(car lst))
+    (lambda ()
+      (dolist (pair (quote ,(cdr lst)))
+        (push pair prettify-symbols-alist)))))
 
 (manx/prettify
  (emacs-lisp-mode-hook

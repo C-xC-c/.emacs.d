@@ -6,13 +6,12 @@
 
 (package-initialize)
 
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
+(defun check-installed (package)
+  (unless (package-installed-p package)
+    (package-refresh-contents)
+    (package-install package)))
 
-(unless (package-installed-p 'spacemacs-theme)
-  (package-refresh-contents)
-  (package-install 'spacemacs-theme))
+(mapc 'check-installed '(use-package spacemacs-theme))
 
 (defun in-emacs-home (file)
   "Checks if a file exists in your emacs home"
@@ -33,4 +32,5 @@
       (org-babel-load-file manx/emacs-org)
     (load manx/emacs-el 'noerror))
   (load custom-file 'noerrror)
-  (load manx/emacs-email 'noerror))
+  (load manx/emacs-email 'noerror)) ;; and this are needed when using emacsclient
+

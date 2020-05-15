@@ -4,34 +4,9 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(TeX-engine (quote xetex))
- '(company-idle-delay 0)
- '(company-minimum-prefix-length 3)
- '(custom-enabled-themes (quote (spacemacs-dark)))
  '(custom-safe-themes
    (quote
-    ("bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" default)))
- '(dashboard-banner-logo-title "Komacs")
- '(dashboard-center-content t)
- '(dashboard-items (quote ((recents . 5))))
- '(dashboard-set-init-info t)
- '(dashboard-show-shortcuts nil)
- '(dashboard-startup-banner "~/.emacs.d/Komacs.png")
- '(ido-vertical-define-keys (quote C-n-and-C-p-only))
- '(nginx-indent-level 2)
- '(nginx-indent-tabs-mode t)
- '(package-selected-packages
-   (quote
-    (transpose-frame auto-minor-mode htmlize alchemist elixir-mode nginx-mode yasnippet-snippets which-key use-package switch-window spacemacs-theme spaceline slime-company popup-kill-ring omnisharp keychain-environment ido-vertical-mode hungry-delete diminish dashboard company-auctex beacon avy)))
- '(slime-lisp-implementations
-   (quote
-    ((sbcl
-      ("sbcl" "--core" "/usr/lib64/sbcl/sbcl.core")
-      :env
-      ("SBCL_HOME=/usr/lib64/sbcl/")))) t)
- '(switch-window-increase 4 t)
- '(switch-window-input-style (quote minibuffer))
- '(switch-window-threshold 2))
+    ("bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" default))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
