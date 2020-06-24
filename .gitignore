@@ -10,3 +10,5 @@ network-security.data
 ido.last
 recentf
 email.el
+org-export.el
+projectile-bookmarks.eld

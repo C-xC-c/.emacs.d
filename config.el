@@ -16,9 +16,22 @@
   :bind ("C-c r e" . 'keychain-refresh-environment)
   :init (keychain-refresh-environment))
 
-(use-package auto-minor-mode)
+(use-package ox-slimhtml)
+(org-export-define-derived-backend 'custom-html-exporter
+    'slimhtml
+  :translate-alist
+  '((code . org-html-code)
+    (timestamp . org-html-timestamp)))
 
-(use-package diminish)
+(use-package projectile
+  :config (projectile-mode 1))
+
+(use-package diminish
+  :init
+  (diminish 'eldoc-mode)
+  (diminish 'org-src-mode))
+
+(use-package auto-minor-mode)
 
 (use-package company
   :diminish 'company-mode
@@ -54,7 +67,7 @@
   (slime-lisp-implementations
    '((sbcl ("sbcl" "--core" "/usr/lib64/sbcl/sbcl.core")
            :env ("SBCL_HOME=/usr/lib64/sbcl/"))))
-  :diminish 'slime-mode
+  :diminish (slime-mode slime-autodoc-mode)
   :init
   (use-package slime-company)
   (add-hook 'lisp-mode-hook 'slime-mode)
@@ -83,8 +96,6 @@
   (dashboard-show-shortcuts nil)
   (dashboard-items '((recents . 5)))
   :config (dashboard-setup-startup-hook))
-
-(setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
 
 (use-package transpose-frame
   :ensure t
@@ -154,7 +165,12 @@
 ;; Don't indent whole file with org-mode
 (eval-after-load "org-mode" (local-set-key (kbd "s-i") nil))
 
-(add-to-list 'org-structure-template-alist '("el" "#+BEGIN_SRC emacs-lisp\n?\n#+END_SRC"))
+(setq org-structure-template-alist
+      (append
+       '(("el" "#+BEGIN_SRC emacs-lisp\n?\n#+END_SRC")
+				 ("lisp" "#+BEGIN_SRC lisp\n?\n#+END_SRC")
+				 ("sh" "#+BEGIN_SRC shell\n?\n#+END_SRC"))
+       org-structure-template-alist))
 
 (setq org-src-tab-acts-natively t
       org-edit-src-content-indentation 0
@@ -163,13 +179,63 @@
 
 (setq org-html-doctype "html5")
 
-(definteractive manx/save-org-to-html()
-  (when (equal major-mode 'org-mode)
-    (save-buffer)
-    (org-html-export-to-html)))
+(defun manx/eval-these (lang body)
+  (not (string-equal "\"\\n\"" body)))
 
-(add-hook 'org-mode-hook
-          (local-keybind "C-c s h" manx/save-org-to-html))
+(setq org-confirm-babel-evaluate 'manx/eval-these)
+
+(defun manx-publish/local-dir (dir)
+  (concat "~/Documents/org/" dir))
+
+(defun manx-publish/remote-dir (dir)
+  (concat "/ssh:plum@plum.moe|sudo:78:" dir))
+
+(defvar manx-publish/html-head "<link rel=\"stylesheet\" href=\"/static/css/style.css\" />")
+
+(defun sitemap (title list)
+  (concat "#+title:" title "\n"
+          "#+setupfile:~/Documents/org/includes/setup.org\n\n"
+          (format "@@html:<h1>%s</h1>@@" title)
+          "@@html:<archive>@@"
+          (string-join (mapcar #'car (cdr list)))
+          "@@html:</archive>@@"))
+
+(setq org-publish-project-alist
+      `(("plum"
+         :base-directory ,(manx-publish/local-dir "plum")
+         :publishing-directory ,(manx-publish/remote-dir "/var/www/plum.moe")
+         :publishing-function ox-slimhtml-publish-to-html
+         :html-head ,manx-publish/html-head
+         :recursive t)
+        ("words"
+         :base-directory ,(manx-publish/local-dir "words")
+         :publishing-directory ,(manx-publish/remote-dir "/var/www/words.plum.moe")
+         :publishing-function ox-slimhtml-publish-to-html
+         :auto-sitemap t
+         :sitemap-filename "index.html"
+         :sitemap-title "Words by Manx"
+         :sitemap-sort-files anti-chronologically
+         :sitemap-file-entry-format "%d - %t"
+         :sitemap-function sitemap
+         :author-info t
+         :creator-info t
+         :html-head ,manx-publish/html-head)
+        ("flags"
+         :base-directory ,(manx-publish/local-dir "flags")
+         :publishing-directory ,(manx-publish/remote-dir "/var/www/flags")
+         :publishing-function ox-slimhtml-publish-to-html
+         :html-head ,manx-publish/html-head)
+        ("static"
+         :base-directory ,(manx-publish/local-dir "static")
+         :base-extension "css\\|js\\|svg"
+         :publishing-function org-publish-attachment
+         :recursive t
+         :publishing-directory ,(manx-publish/remote-dir "/var/www/plum.moe/static"))))
+
+(definteractive manx/blog ()
+  (load-theme 'spacemacs-light)
+  (org-publish-project "words")
+  (load-theme 'spacemacs-dark))
 
 (definteractive manx/delete-org-link ()
   (when (org-in-regexp org-bracket-link-regexp 1)
@@ -193,6 +259,7 @@
   (save-excursion
     (indent-region (point-min) (point-max) nil)))
 
+(global-set-key (kbd "C-c M-w") (lambdainteractive () (kill-ring-save (point-min) (point-max))))
 (global-set-key (kbd "C-c k l") 'manx/kill-line)
 (global-set-key (kbd "s-i") 'manx/format-whole-buffer)
 (global-set-key (kbd "C-c r b") 'revert-buffer)
@@ -201,6 +268,10 @@
 (definteractive manx/scratch-buffer ()
   (switch-to-buffer (get-buffer-create "*scratch*"))
   (lisp-interaction-mode))
+
+(definteractive manx/lisp-buffer ()
+  (switch-to-buffer (get-buffer-create "*lisp playground*"))
+  (lisp-mode))
 
 (definteractive manx/kill-all ()
   (mapc 'kill-buffer (buffer-list))
@@ -212,9 +283,9 @@
 
 (defmacro manx/split-and-follow (direction)
 	`(progn
-		 ,direction
-		 (balance-windows)
-		 (other-window 1)))
+		       ,direction
+		       (balance-windows)
+		       (other-window 1)))
 
 (global-set-key (kbd "C-x 3")
 								(lambdainteractive () (manx/split-and-follow (split-window-below))))

@@ -34,13 +34,30 @@ Always ensure packages are installed. Log to ~*Messages*~.
   :bind ("C-c r e" . 'keychain-refresh-environment)
   :init (keychain-refresh-environment))
 #+END_SRC
-** auto-minor-mode
+** slimhtml
 #+BEGIN_SRC emacs-lisp
-(use-package auto-minor-mode)
+(use-package ox-slimhtml)
+(org-export-define-derived-backend 'custom-html-exporter
+    'slimhtml
+  :translate-alist
+  '((code . org-html-code)
+    (timestamp . org-html-timestamp)))
+#+END_SRC
+** projectile
+#+BEGIN_SRC emacs-lisp
+(use-package projectile
+  :config (projectile-mode 1))
 #+END_SRC
 ** diminish
 #+BEGIN_SRC emacs-lisp
-(use-package diminish)
+(use-package diminish
+  :init
+  (diminish 'eldoc-mode)
+  (diminish 'org-src-mode))
+#+END_SRC
+** auto-minor-mode
+#+BEGIN_SRC emacs-lisp
+(use-package auto-minor-mode)
 #+END_SRC
 ** company
 #+BEGIN_SRC emacs-lisp
@@ -88,7 +105,7 @@ sbcl is in a werid place on Gentoo.
   (slime-lisp-implementations
    '((sbcl ("sbcl" "--core" "/usr/lib64/sbcl/sbcl.core")
            :env ("SBCL_HOME=/usr/lib64/sbcl/"))))
-  :diminish 'slime-mode
+  :diminish (slime-mode slime-autodoc-mode)
   :init
   (use-package slime-company)
   (add-hook 'lisp-mode-hook 'slime-mode)
@@ -123,8 +140,6 @@ sbcl is in a werid place on Gentoo.
   (dashboard-show-shortcuts nil)
   (dashboard-items '((recents . 5)))
   :config (dashboard-setup-startup-hook))
-
-(setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
 #+END_SRC
 ** windows and frames
 *** transpose-frame
@@ -213,6 +228,7 @@ Also saves config if open. manx/emacs-org is defined in [[./init.el][init.el]]
 ** misc
 #+BEGIN_SRC emacs-lisp
 (setq org-src-window-setup 'current-window)
+(setq org-html-doctype "html5")
 
 ;; I read somewhere that Company breaks things?
 (add-hook 'org-mode-hook 'company-mode)
@@ -220,25 +236,18 @@ Also saves config if open. manx/emacs-org is defined in [[./init.el][init.el]]
 ;; Don't indent whole file with org-mode
 (eval-after-load "org-mode" (local-set-key (kbd "s-i") nil))
 
-(add-to-list 'org-structure-template-alist '("el" "#+BEGIN_SRC emacs-lisp\n?\n#+END_SRC"))
+(setq org-structure-template-alist
+      (append
+       '(("el" "#+BEGIN_SRC emacs-lisp\n?\n#+END_SRC")
+				 ("lisp" "#+BEGIN_SRC lisp\n?\n#+END_SRC")
+				 ("sh" "#+BEGIN_SRC shell\n?\n#+END_SRC"))
+       org-structure-template-alist))
 
 (setq org-src-tab-acts-natively t
       org-edit-src-content-indentation 0
       org-src-preserve-indentation nil
       org-agenda-files '("~/todo.org"))
 #+END_SRC
-** html export
-#+BEGIN_SRC emacs-lisp
-(setq org-html-doctype "html5")
-
-(definteractive manx/save-org-to-html()
-  (when (equal major-mode 'org-mode)
-    (save-buffer)
-    (org-html-export-to-html)))
-
-(add-hook 'org-mode-hook
-          (local-keybind "C-c s h" manx/save-org-to-html))
-#+END_SRC 
 ** Links
 #+BEGIN_SRC emacs-lisp
 (definteractive manx/delete-org-link ()
@@ -268,6 +277,7 @@ Also saves config if open. manx/emacs-org is defined in [[./init.el][init.el]]
   (save-excursion
     (indent-region (point-min) (point-max) nil)))
 
+(global-set-key (kbd "C-c M-w") (lambdainteractive () (kill-ring-save (point-min) (point-max))))
 (global-set-key (kbd "C-c k l") 'manx/kill-line)
 (global-set-key (kbd "s-i") 'manx/format-whole-buffer)
 (global-set-key (kbd "C-c r b") 'revert-buffer)
@@ -278,6 +288,10 @@ Also saves config if open. manx/emacs-org is defined in [[./init.el][init.el]]
 (definteractive manx/scratch-buffer ()
   (switch-to-buffer (get-buffer-create "*scratch*"))
   (lisp-interaction-mode))
+
+(definteractive manx/lisp-buffer ()
+  (switch-to-buffer (get-buffer-create "*lisp playground*"))
+  (lisp-mode))
 
 (definteractive manx/kill-all ()
   (mapc 'kill-buffer (buffer-list))
@@ -417,7 +431,6 @@ Null prefix argument turns off the mode."
     (setq-local make-backup-files t)
     (auto-save-mode 1)))
 
-
 ;; Regexps of sensitive files.
 (setq auto-minor-mode-alist
       (append
@@ -426,3 +439,4 @@ Null prefix argument turns off the mode."
          ("/etc/nginx/*" . sensitive-minor-mode))
        auto-minor-mode-alist))
 #+END_SRC
+

@@ -1,4 +1,3 @@
-;; required package fluff
 (require 'package)
 (setq package-enable-at-startup nil)
 (add-to-list 'package-archives
@@ -25,12 +24,14 @@
 (defconst manx/emacs-el (in-emacs-home "config.el"))
 (defconst manx/emacs-org (in-emacs-home "config.org"))
 (defconst manx/emacs-email (in-emacs-home "email.el"))
+(defconst manx/org-export (in-emacs-home "export.el"))
 
-;; If everything exists then execute files
-(unless (member nil '(custom-file manx/emacs-el manx/emacs-org manx/emacs-email))
+(when (and manx/emacs-el manx/emacs-org)
   (if (file-newer-than-file-p manx/emacs-org manx/emacs-el)
       (org-babel-load-file manx/emacs-org)
-    (load manx/emacs-el 'noerror))
-  (load custom-file 'noerrror)
-  (load manx/emacs-email 'noerror)) ;; and this are needed when using emacsclient
+    (load manx/emacs-el 'noerror)))
 
+(mapc (lambda (file)
+        (when file
+          (load file 'noerror)))
+      '(manx/emacs-email manx/org-export custom-file))
