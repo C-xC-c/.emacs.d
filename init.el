@@ -24,7 +24,7 @@
 (defconst manx/emacs-el (in-emacs-home "config.el"))
 (defconst manx/emacs-org (in-emacs-home "config.org"))
 (defconst manx/emacs-email (in-emacs-home "email.el"))
-(defconst manx/org-export (in-emacs-home "export.el"))
+(defconst manx/org-export (in-emacs-home "org-export.el"))
 
 (when (and manx/emacs-el manx/emacs-org)
   (if (file-newer-than-file-p manx/emacs-org manx/emacs-el)
@@ -34,4 +34,4 @@
 (mapc (lambda (file)
         (when file
           (load file 'noerror)))
-      '(manx/emacs-email manx/org-export custom-file))
+      (list manx/emacs-email manx/org-export custom-file))

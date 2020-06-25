@@ -61,6 +61,10 @@
   (nginx-indent-level 2)
   :config (add-to-list 'auto-mode-alist '("/nginx/sites-\\(?:available\\|enabled\\)/" . nginx-mode)))
 
+(defun manx/lisp-keys ()
+  (local-set-key (kbd "C-c e") 'slime-eval-defun)
+  (define-key slime-mode-indirect-map (kbd "C-c x") nil))
+
 (use-package slime
   :defer t
   :custom
@@ -71,6 +75,9 @@
   :init
   (use-package slime-company)
   (add-hook 'lisp-mode-hook 'slime-mode)
+  (add-hook 'slime-mode 'manx/lisp-keys)
+  (unbind-key "C-c x" slime-mode-map)
+  (unbind-key "C-c x" slime-mode-indirect-map)
   (slime-setup '(slime-fancy slime-company)))
 
 (use-package htmlize)
@@ -158,6 +165,7 @@
 (global-set-key (kbd "C-c x e") (lambdainteractive () (find-file manx/emacs-org)))
 
 (setq org-src-window-setup 'current-window)
+(setq org-html-doctype "html5")
 
 ;; I read somewhere that Company breaks things?
 (add-hook 'org-mode-hook 'company-mode)
@@ -176,66 +184,6 @@
       org-edit-src-content-indentation 0
       org-src-preserve-indentation nil
       org-agenda-files '("~/todo.org"))
-
-(setq org-html-doctype "html5")
-
-(defun manx/eval-these (lang body)
-  (not (string-equal "\"\\n\"" body)))
-
-(setq org-confirm-babel-evaluate 'manx/eval-these)
-
-(defun manx-publish/local-dir (dir)
-  (concat "~/Documents/org/" dir))
-
-(defun manx-publish/remote-dir (dir)
-  (concat "/ssh:plum@plum.moe|sudo:78:" dir))
-
-(defvar manx-publish/html-head "<link rel=\"stylesheet\" href=\"/static/css/style.css\" />")
-
-(defun sitemap (title list)
-  (concat "#+title:" title "\n"
-          "#+setupfile:~/Documents/org/includes/setup.org\n\n"
-          (format "@@html:<h1>%s</h1>@@" title)
-          "@@html:<archive>@@"
-          (string-join (mapcar #'car (cdr list)))
-          "@@html:</archive>@@"))
-
-(setq org-publish-project-alist
-      `(("plum"
-         :base-directory ,(manx-publish/local-dir "plum")
-         :publishing-directory ,(manx-publish/remote-dir "/var/www/plum.moe")
-         :publishing-function ox-slimhtml-publish-to-html
-         :html-head ,manx-publish/html-head
-         :recursive t)
-        ("words"
-         :base-directory ,(manx-publish/local-dir "words")
-         :publishing-directory ,(manx-publish/remote-dir "/var/www/words.plum.moe")
-         :publishing-function ox-slimhtml-publish-to-html
-         :auto-sitemap t
-         :sitemap-filename "index.html"
-         :sitemap-title "Words by Manx"
-         :sitemap-sort-files anti-chronologically
-         :sitemap-file-entry-format "%d - %t"
-         :sitemap-function sitemap
-         :author-info t
-         :creator-info t
-         :html-head ,manx-publish/html-head)
-        ("flags"
-         :base-directory ,(manx-publish/local-dir "flags")
-         :publishing-directory ,(manx-publish/remote-dir "/var/www/flags")
-         :publishing-function ox-slimhtml-publish-to-html
-         :html-head ,manx-publish/html-head)
-        ("static"
-         :base-directory ,(manx-publish/local-dir "static")
-         :base-extension "css\\|js\\|svg"
-         :publishing-function org-publish-attachment
-         :recursive t
-         :publishing-directory ,(manx-publish/remote-dir "/var/www/plum.moe/static"))))
-
-(definteractive manx/blog ()
-  (load-theme 'spacemacs-light)
-  (org-publish-project "words")
-  (load-theme 'spacemacs-dark))
 
 (definteractive manx/delete-org-link ()
   (when (org-in-regexp org-bracket-link-regexp 1)
@@ -387,7 +335,6 @@ Null prefix argument turns off the mode."
         (auto-save-mode -1))
     (setq-local make-backup-files t)
     (auto-save-mode 1)))
-
 
 ;; Regexps of sensitive files.
 (setq auto-minor-mode-alist
