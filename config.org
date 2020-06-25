@@ -99,6 +99,10 @@ Always ensure packages are installed. Log to ~*Messages*~.
 *** slime
 sbcl is in a werid place on Gentoo.
 #+BEGIN_SRC emacs-lisp
+(defun manx/lisp-keys ()
+  (local-set-key (kbd "C-c e") 'slime-eval-defun)
+  (define-key slime-mode-indirect-map (kbd "C-c x") nil))
+
 (use-package slime
   :defer t
   :custom
@@ -109,6 +113,9 @@ sbcl is in a werid place on Gentoo.
   :init
   (use-package slime-company)
   (add-hook 'lisp-mode-hook 'slime-mode)
+  (add-hook 'slime-mode 'manx/lisp-keys)
+  (unbind-key "C-c x" slime-mode-map)
+  (unbind-key "C-c x" slime-mode-indirect-map)
   (slime-setup '(slime-fancy slime-company)))
 #+END_SRC
 *** htmlize
