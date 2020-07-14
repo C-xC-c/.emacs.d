@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: words header
+# key: <words
+# --
+#+title: ${1:}
+#+setupfile: ~/Documents/org/includes/setup.org
+* ${2:}
+$0

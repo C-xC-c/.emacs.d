@@ -13,11 +13,11 @@
 (mapc 'check-installed '(use-package spacemacs-theme))
 
 (defun in-emacs-home (file)
-  "Checks if a file exists in your emacs home"
-  (when (stringp file)
-    (let ((file (concat user-emacs-directory file)))
-      (when (file-exists-p file)
-        file))))
+  "Returns `file' if it exists in your Emacs home, else nil"
+  (declare (type string file))
+  (let ((home-file (concat user-emacs-directory file)))
+    (when (file-exists-p home-file)
+      home-file)))
 
 ;; Files we care about loading
 (setq custom-file (in-emacs-home "custom.el"))
@@ -26,10 +26,13 @@
 (defconst manx/emacs-email (in-emacs-home "email.el"))
 (defconst manx/org-export (in-emacs-home "org-export.el"))
 
-(when (and manx/emacs-el manx/emacs-org)
+(cond
+ ((and manx/emacs-el manx/emacs-org)
   (if (file-newer-than-file-p manx/emacs-org manx/emacs-el)
       (org-babel-load-file manx/emacs-org)
     (load manx/emacs-el 'noerror)))
+ ((manx/emacs-org)
+  (org-babel-load-file manx/emacs-org)))
 
 (mapc (lambda (file)
         (when file

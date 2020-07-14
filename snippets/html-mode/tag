@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: tag
+# key: t
+# contributor : Manx <boku@plum.moe>
+# --
+<${1:tag}>$0</$1>

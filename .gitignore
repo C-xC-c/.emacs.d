@@ -12,3 +12,6 @@ recentf
 email.el
 org-export.el
 projectile-bookmarks.eld
+bookmarks
+config.el
+custom.el

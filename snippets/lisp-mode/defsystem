@@ -3,7 +3,7 @@
 # key: defs
 # contributor: Manx <boku@plum.moe>
 # --
-(asdf:defsystem #:${1:system-name}
+(asdf:defsystem :${1:system-name}
   :description "${2:none}"
   :author "Manx (boku@plum.moe)"
   :license ${3:"X11/MIT"}

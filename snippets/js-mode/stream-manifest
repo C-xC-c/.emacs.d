@@ -1,0 +1,17 @@
+# -*- mode: snippet -*-
+# name: Stream Manifest Files
+# key: s-m
+# contributor : Manx <boku@plum.moe>
+# --
+{
+  "title": "${1:}",
+  "duration": ${2:},
+  "live": false,
+  "sources": [
+    {
+      "url": "https://plum.moe/media/${3:}.mp4",
+      "contentType": "video/mp4",
+      "quality": 720
+    }
+  ]
+}
