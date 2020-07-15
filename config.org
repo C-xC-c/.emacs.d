@@ -34,11 +34,6 @@ Always ensure packages are installed. Log start times to =*Messages*=.
   :bind ("C-c r e" . 'keychain-refresh-environment)
   :init (keychain-refresh-environment))
 #+END_SRC
-** projectile
-#+BEGIN_SRC emacs-lisp
-(use-package projectile
-  :config (projectile-mode 1))
-#+END_SRC
 ** diminish
 #+BEGIN_SRC emacs-lisp
 (use-package diminish
@@ -49,17 +44,6 @@ Always ensure packages are installed. Log start times to =*Messages*=.
 ** auto-minor-mode
 #+BEGIN_SRC emacs-lisp
 (use-package auto-minor-mode)
-#+END_SRC
-** company
-#+BEGIN_SRC emacs-lisp
-(use-package company
-  :diminish 'company-mode
-  :bind (:map company-mode-map
-              ("C-c /" . 'yas-expand))
-  :custom
-  (company-idle-delay 0)
-  (company-minimum-prefix-length 3)
-  :init (add-hook 'after-init-hook 'global-company-mode))
 #+END_SRC
 ** prog
 *** nginx
@@ -176,15 +160,58 @@ sbcl is in a werid place on Gentoo.
  (use-package popup-kill-ring
    :bind ("M-y" . popup-kill-ring))
  #+END_SRC
-** plumhtml
+** IDE
+*** company
+#+BEGIN_SRC emacs-lisp
+(use-package company
+  :diminish 'company-mode
+  :bind (:map company-mode-map
+              ("C-c /" . 'yas-expand))
+  :custom
+  (company-idle-delay 0)
+  (company-minimum-prefix-length 3)
+  :init (add-hook 'after-init-hook 'global-company-mode))
+#+END_SRC
+*** projectile
+#+BEGIN_SRC emacs-lisp
+(use-package projectile
+  :config (projectile-mode 1))
+#+END_SRC
+*** flycheck
+ #+BEGIN_SRC emacs-lisp
+ (use-package flycheck
+   :diminish 'flycheck-mode
+   :init (global-flycheck-mode))
+ #+END_SRC
+*** lsp
+#+BEGIN_SRC emacs-lisp
+(use-package lsp-mode)
+#+END_SRC
+** my shit
+*** plumhtml
 #+BEGIN_SRC emacs-lisp
 (use-package ox-slimhtml
   :init (use-package plumhtml))
 #+END_SRC
-** package.use-mode
+*** package.use-mode
 #+BEGIN_SRC emacs-lisp
-(use-package package.use-mode
-  :ensure t)
+(use-package package.use-mode)
+#+END_SRC
+** treemacs
+#+BEGIN_SRC emacs-lisp
+(use-package treemacs
+  :bind ("s-t" . treemacs)
+  :custom (treemacs-width 25))
+
+(use-package treemacs-projectile
+  :after treemacs projectile)
+
+(use-package treemacs-magit
+  :after treemacs magit)
+
+(use-package treemacs-icons-dired
+  :after treemacs dired
+  :config (treemacs-icons-dired-mode))
 #+END_SRC
 * org
 ** edit/reload config 
