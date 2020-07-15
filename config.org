@@ -177,27 +177,15 @@ sbcl is in a werid place on Gentoo.
 (use-package projectile
   :config (projectile-mode 1))
 #+END_SRC
-*** flycheck
- #+BEGIN_SRC emacs-lisp
- (use-package flycheck
-   :diminish 'flycheck-mode
-   :init (global-flycheck-mode))
- #+END_SRC
+*** magit
+#+BEGIN_SRC emacs-lisp
+(use-package magit)
+#+END_SRC
 *** lsp
 #+BEGIN_SRC emacs-lisp
 (use-package lsp-mode)
 #+END_SRC
-** my shit
-*** plumhtml
-#+BEGIN_SRC emacs-lisp
-(use-package ox-slimhtml
-  :init (use-package plumhtml))
-#+END_SRC
-*** package.use-mode
-#+BEGIN_SRC emacs-lisp
-(use-package package.use-mode)
-#+END_SRC
-** treemacs
+*** treemacs
 #+BEGIN_SRC emacs-lisp
 (use-package treemacs
   :bind ("s-t" . treemacs)
@@ -212,6 +200,17 @@ sbcl is in a werid place on Gentoo.
 (use-package treemacs-icons-dired
   :after treemacs dired
   :config (treemacs-icons-dired-mode))
+#+END_SRC
+** my shit
+*** plumhtml
+#+BEGIN_SRC emacs-lisp
+(use-package ox-slimhtml)
+(use-package ox-plumhtml
+  :after ox-slimhtml)
+#+END_SRC
+*** package.use-mode
+#+BEGIN_SRC emacs-lisp
+(use-package package.use-mode)
 #+END_SRC
 * org
 ** edit/reload config 
