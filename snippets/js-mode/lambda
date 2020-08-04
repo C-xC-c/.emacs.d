@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: lambda braces
+# key: lb
+# --
+(${1:}) => {
+				$0
+}

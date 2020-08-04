@@ -1,0 +1,24 @@
+# -*- mode: snippet -*-
+# name: derive-many
+# key: dm
+# --
+#[derive(${1:$$(yas-choose-value
+'("Debug, Clone"
+"Debug, PartialEq"
+"Debug, Eq"
+"Debug Hash"
+"Clone, PartialEq"
+"Clone Eq"
+"Clone Hash"
+"PartialEq, Eq"
+"PartialEq Hash"
+"Debug, Clone, PartialEq"
+"Debug, Clone, Eq"
+"Debug, Clone, Hash"
+"Clone, PartialEq, Eq"
+"Clone, PartialEq, Eq"
+"Clone, Eq, Hash"
+"PartialEq, Eq, Hash"
+"Debug, Clone, PartialEq, Eq"
+"Clone, PartialEq, Eq, Hash"
+"Debug, Clone, PartialEq, Eq, Hash"))})]

@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# name: struct Error
+# key: s-E
+# --
+#[derive(Debug)]
+struct ${1:Error} {
+    $0
+}
+impl std::error::Error for $1{}
+impl std::fmt::Display for $1
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result
+    {
+	Ok(())
+    }
+}

@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: print debug
+# key: :?
+# --
+println!("{:?}", ${1:});

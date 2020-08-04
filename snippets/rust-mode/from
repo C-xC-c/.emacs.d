@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: from
+# key: From
+# --
+From<${1:TypeFrom}> for ${2:TypeTo}
+{
+    fn from(from: $1) -> Self
+    {
+	$0
+    }
+}

@@ -37,9 +37,8 @@ Always ensure packages are installed. Log start times to =*Messages*=.
 ** diminish
 #+BEGIN_SRC emacs-lisp
 (use-package diminish
-  :init
-  (diminish '(eldoc-mode 
-              org-src-mode)))
+  :init (diminish '(eldoc-mode
+                    org-src-mode)))
 #+END_SRC
 ** auto-minor-mode
 #+BEGIN_SRC emacs-lisp
@@ -80,17 +79,17 @@ sbcl is in a werid place on Gentoo.
 #+BEGIN_SRC emacs-lisp
 (use-package htmlize)
 #+END_SRC
-** yasnippet
- #+BEGIN_SRC emacs-lisp
- (use-package yasnippet
-	 :diminish 'yas-minor-mode
-	 :hook ((html-mode
-					 emacs-lisp-mode
-					 lisp-mode
-					 org-mode)
-					. yas-minor-mode)
-	 :init (yas-reload-all))
- #+END_SRC
+*** rust
+#+begin_src emacs-lisp
+(use-package rust-mode
+  :hook (rust-mode . lsp)
+  :bind (:map rust-mode-map
+              ("<C-c TAB>" . #'rust-format-buffer)))
+
+(use-package cargo
+  :after rust-mode
+  :hook (rust-mode . cargo-minor-mode))
+#+end_src
 ** windows and frames
 *** transpose-frame
 #+BEGIN_SRC emacs-lisp
@@ -161,6 +160,10 @@ sbcl is in a werid place on Gentoo.
    :bind ("M-y" . popup-kill-ring))
  #+END_SRC
 ** IDE
+*** lsp
+#+begin_src emacs-lisp
+(use-package lsp-mode)
+#+end_src
 *** company
 #+BEGIN_SRC emacs-lisp
 (use-package company
@@ -179,11 +182,10 @@ sbcl is in a werid place on Gentoo.
 #+END_SRC
 *** magit
 #+BEGIN_SRC emacs-lisp
-(use-package magit)
-#+END_SRC
-*** lsp
-#+BEGIN_SRC emacs-lisp
-(use-package lsp-mode)
+(use-package magit
+  :custom (magit-repository-directories
+           '(("/home/manx/prog/" . 3)
+             ("/home/manx/.emacs.d/" . 1))))
 #+END_SRC
 *** treemacs
 #+BEGIN_SRC emacs-lisp
@@ -201,6 +203,16 @@ sbcl is in a werid place on Gentoo.
   :after treemacs dired
   :config (treemacs-icons-dired-mode))
 #+END_SRC
+*** yasnippet
+ #+BEGIN_SRC emacs-lisp
+	(use-package yasnippet
+		:diminish 'yas-minor-mode
+		:hook ((html-mode emacs-lisp-mode
+						lisp-mode org-mode
+						svelte-mode rust-mode)
+					 . yas-minor-mode)
+		:config (yas-reload-all))
+ #+END_SRC
 ** my shit
 *** plumhtml
 #+BEGIN_SRC emacs-lisp
@@ -238,8 +250,8 @@ Also saves config if open. manx/emacs-org is defined in [[./init.el][init.el]]
 (setq org-structure-template-alist
       (append
        '(("el" "#+BEGIN_SRC emacs-lisp\n?\n#+END_SRC")
-				 ("lisp" "#+BEGIN_SRC lisp\n?\n#+END_SRC")
-				 ("sh" "#+BEGIN_SRC shell\n?\n#+END_SRC"))
+         ("lisp" "#+BEGIN_SRC lisp\n?\n#+END_SRC")
+         ("sh" "#+BEGIN_SRC shell\n?\n#+END_SRC"))
        org-structure-template-alist))
 
 (setq org-src-tab-acts-natively t
@@ -275,10 +287,14 @@ Also saves config if open. manx/emacs-org is defined in [[./init.el][init.el]]
   (save-excursion
     (indent-region (point-min) (point-max) nil)))
 
+(definteractive manx/word-count ()
+  (message "Words: %s" (count-words-region (point-min) (point-max))))
+
 (global-set-key (kbd "C-c M-w") (lambdainteractive () (kill-ring-save (point-min) (point-max))))
 (global-set-key (kbd "C-c k l") 'manx/kill-line)
 (global-set-key (kbd "s-i") 'manx/format-whole-buffer)
 (global-set-key (kbd "C-c r b") 'revert-buffer)
+(global-set-key (kbd "C-c w") 'manx/word-count)
 (global-set-key (kbd "<M-right>") 'forward-whitespace)
 #+END_SRC
 ** buffers
@@ -291,26 +307,34 @@ Also saves config if open. manx/emacs-org is defined in [[./init.el][init.el]]
   (switch-to-buffer (get-buffer-create "*lisp playground*"))
   (lisp-mode))
 
-(definteractive manx/kill-all ()
+(definteractive manx/kill-all-buffers ()
   (mapc 'kill-buffer (buffer-list))
   (manx/scratch-buffer))
 
+(definteractive manx/save-kill-all-files ()
+  (save-some-buffers t nil)
+  (mapc (lambda (file)
+          (kill-buffer file))
+        (delq (current-buffer)
+              (remove-if-not 'buffer-file-name (buffer-list)))))
+
 (global-set-key (kbd "C-c s b") 'manx/scratch-buffer)
 (global-set-key (kbd "C-x k") (lambdainteractive () (kill-buffer (current-buffer))))
-(global-set-key (kbd "C-M-s-k") 'manx/kill-all)
+(global-set-key (kbd "C-M-s-k") 'manx/kill-all-buffers)
+(global-set-key (kbd "C-M-s-s") 'manx/save-kill-all-files)
 #+END_SRC
 ** frames
  #+BEGIN_SRC emacs-lisp
  (defmacro manx/split-and-follow (direction)
-	 `(progn
-			,direction
-			(balance-windows)
-			(other-window 1)))
+   `(progn
+      ,direction
+      (balance-windows)
+      (other-window 1)))
 
  (global-set-key (kbd "C-x 3")
-								 (lambdainteractive () (manx/split-and-follow (split-window-below))))
+                 (lambdainteractive () (manx/split-and-follow (split-window-below))))
  (global-set-key (kbd "C-x 2")
-								 (lambdainteractive () (manx/split-and-follow (split-window-horizontally))))
+                 (lambdainteractive () (manx/split-and-follow (split-window-horizontally))))
  #+END_SRC
 ** windows
 Themes don't load in the first emacsclient for some reason so we load
@@ -325,6 +349,17 @@ it ourselves
   (progn
     (load-theme 'spacemacs-dark t)
     (spaceline-compile)))
+#+END_SRC
+** magit
+#+BEGIN_SRC emacs-lisp
+(defun manx/magit-push-all ()
+  "Push all branches."
+  (interactive)
+  ( "push" "-v" (magit-read-remote "Remote") "--all"))
+
+;; This doesn't work
+(transient-append-suffix 'magit-push "t"
+  '("a" "all" manx/magit-push-all))
 #+END_SRC
 * misc
 ** unix line endings
@@ -369,6 +404,8 @@ parens.
 
 (setq backup-directory-alist
       `(("." . ,(concat user-emacs-directory "autosaves"))))
+
+(add-to-list 'grep-find-ignored-directories "node_modules")
 #+END_SRC
 *** unset
 #+BEGIN_SRC emacs-lisp
@@ -386,6 +423,7 @@ parens.
 Print manx/ so we don't have to prefix our commands in the minibuffer
 #+BEGIN_SRC emacs-lisp
 (global-set-key (kbd "s-m") "manx/")
+(global-set-key (kbd "M-0") 'other-window)
 #+END_SRC
 **** emacs lisp
 #+BEGIN_SRC emacs-lisp
@@ -399,8 +437,10 @@ tabs > spaces. Except in Lisp.
 
 (add-hook 'lisp-mode-hook (lambda () (setq indent-tabs-mode nil)))
 (add-hook 'emacs-lisp-mode-hook (lambda () (setq indent-tabs-mode nil)))
+(add-hook 'find-file-hook 'hack-dir-local-variables-non-file-buffer)
 (defvaralias 'css-indent-offset 'tab-width)
 (defvaralias 'js-indent-level 'tab-width)
+(setq sh-basic-offset tab-width)
 #+END_SRC
 ** prettify symbols
 #+BEGIN_SRC emacs-lisp
@@ -408,9 +448,9 @@ tabs > spaces. Except in Lisp.
 
 (defmacro manx/prettify (lst)
   `(add-hook (quote ,(car lst))
-    (lambda ()
-      (dolist (pair (quote ,(cdr lst)))
-        (push pair prettify-symbols-alist)))))
+             (lambda ()
+               (dolist (pair (quote ,(cdr lst)))
+                 (push pair prettify-symbols-alist)))))
 
 (manx/prettify
  (emacs-lisp-mode-hook
@@ -424,7 +464,8 @@ tabs > spaces. Except in Lisp.
 
 (manx/prettify
  (js-mode-hook
-  ("=>" . ?⇒)))
+  ("=>" . ?⇒)
+  ("null" . ?∅)))
 #+END_SRC
 * sensitive-minor-mode
 #+BEGIN_SRC emacs-lisp

@@ -1,7 +1,8 @@
 (require 'package)
+
 (setq package-enable-at-startup nil)
 (add-to-list 'package-archives
-             '("melpa" . "http://melpa.milkbox.net/packages/") t)
+             '("melpa" . "http://melpa.org/packages/") t)
 
 (package-initialize)
 
@@ -13,7 +14,7 @@
 (mapc 'check-installed '(use-package spacemacs-theme))
 
 (defun in-emacs-home (file)
-  "Returns `file' if it exists in your Emacs home, else nil"
+  "Returns `file' if it exists in `user-emacs-directory'"
   (declare (type string file))
   (let ((home-file (concat user-emacs-directory file)))
     (when (file-exists-p home-file)
