@@ -1,50 +1,60 @@
-* macros
-These are global macros used throughout my config file.
-** definteractive
-Wrappers around functions and lambdas so I don't have to type
-(interactive) all the damn time
+My emacs config. Declared literatively and processed by
+~org-babel-load-file~, you can see how that works in =init.el=.
 
-I have ~prettify-symbols-mode~ set ~lambdainteractive~ to Λ (capital lambda) because it's cute.
+* macros
 #+BEGIN_SRC emacs-lisp
 (defmacro definteractive (name &rest body)
+  "Shorthand for defining an interactive function.
+
+This is wholly equivalent to
+\(defun NAME (args)
+  (interactive)
+  (body))
+"
   `(defun ,name ,(car body)
      (interactive)
      ,@(cdr body)))
 
 (defmacro lambdainteractive (&rest body)
+  "Shorthand for defining an interactive lambda."
   `(lambda ,(car body) (interactive) ,@(cdr body)))
-#+END_SRC
-** local-keybind
-Hide unecessary lambda when calling (local-set-key) for org-mode
-functions
-#+BEGIN_SRC emacs-lisp
+
 (defmacro local-keybind (key value)
+"Shorthand for wrapping (local-set-key) in a lambda."
   `(lambda () (local-set-key (kbd ,key) (quote ,value))))
 #+END_SRC
 * use-package
-** use-package config
-Always ensure packages are installed. Log start times to =*Messages*=.
+There's a lot of nonsense in here. I hardly use the vast majority of
+it day-to-day, and it bloats the hell out of my config. I should
+really look into shortening this down at some point.
+
 #+BEGIN_SRC emacs-lisp
 (setq use-package-always-ensure t
       use-package-verbose t)
 #+END_SRC
 ** keychain-environment
+This is only relevant on some machines, I don't need it everywhere.
 #+BEGIN_SRC emacs-lisp
 (use-package keychain-environment
   :bind ("C-c r e" . 'keychain-refresh-environment)
   :init (keychain-refresh-environment))
 #+END_SRC
 ** diminish
+I honestly can't believe this isn't a builtin.
 #+BEGIN_SRC emacs-lisp
 (use-package diminish
   :init (diminish '(eldoc-mode
                     org-src-mode)))
 #+END_SRC
 ** auto-minor-mode
+The only use for this I can see is in =sensitive-minor-mode=, which
+makes keeping it round worth it I guess?
 #+BEGIN_SRC emacs-lisp
 (use-package auto-minor-mode)
 #+END_SRC
 ** prog
+This should be merged with IDE, or really most of it needs to be
+removed.
 *** nginx
 #+BEGIN_SRC emacs-lisp
 (use-package nginx-mode
@@ -100,7 +110,7 @@ sbcl is in a werid place on Gentoo.
 #+END_SRC
 *** switch window
 #+BEGIN_SRC emacs-lisp
-(use-package switch-window
+(use-package switch-window)
   :custom
   (switch-window-input-style 'minibuffer)
   (switch-window-increase 4)
@@ -123,7 +133,7 @@ sbcl is in a werid place on Gentoo.
 #+BEGIN_SRC emacs-lisp
 (use-package spaceline
   :init
-  (require 'spaceline-config)
+  (require spaceline-config)
   (spaceline-spacemacs-theme)
   :config
   (spaceline-toggle-buffer-size-off)
@@ -131,33 +141,26 @@ sbcl is in a werid place on Gentoo.
   (setq powerline-default-seperator 'arrow))
 #+END_SRC
 ** minor modes
-*** hungry-delete
+I've tried to limit this to only things I use all the time, and
+there's not a lot to say about them individually. 
  #+BEGIN_SRC emacs-lisp
  (use-package hungry-delete
-   :diminish 'hungry-delete-mode
-   :config (global-hungry-delete-mode 1))
- #+END_SRC
-*** which-key
- #+BEGIN_SRC emacs-lisp
+	 :diminish 'hungry-delete-mode
+	 :config (global-hungry-delete-mode 1))
+
  (use-package which-key
-   :diminish 'which-key-mode
-   :config (which-key-mode))
- #+END_SRC
-*** avy
- #+BEGIN_SRC emacs-lisp
+	 :diminish 'which-key-mode
+	 :config (which-key-mode))
+
  (use-package avy
-   :bind ("M-s" . avy-goto-char))
- #+END_SRC
-*** beacon
- #+BEGIN_SRC emacs-lisp
+	 :bind ("M-s" . avy-goto-char))
+
  (use-package beacon
-   :diminish 'beacon-mode
-   :config (beacon-mode 1))
- #+END_SRC
-*** popup-kill-ring
- #+BEGIN_SRC emacs-lisp
+	 :diminish 'beacon-mode
+	 :config (beacon-mode 1))
+
  (use-package popup-kill-ring
-   :bind ("M-y" . popup-kill-ring))
+	 :bind ("M-y" . popup-kill-ring))
  #+END_SRC
 ** IDE
 *** lsp
@@ -243,10 +246,8 @@ Also saves config if open. manx/emacs-org is defined in [[./init.el][init.el]]
 ;; I read somewhere that Company breaks things?
 (add-hook 'org-mode-hook 'company-mode)
 
-;; Don't indent whole file with org-mode
-;;(add-hook 'org-mode-hook (lambda () (local-set-key (kbd "s-i") nil)))
-
-;; We don't need this is we configure yasnippet.
+;; I'm not sure if I need this, we have yasnippets that do a similar
+;; thing.
 (setq org-structure-template-alist
       (append
        '(("el" "#+BEGIN_SRC emacs-lisp\n?\n#+END_SRC")
@@ -326,15 +327,16 @@ Also saves config if open. manx/emacs-org is defined in [[./init.el][init.el]]
 ** frames
  #+BEGIN_SRC emacs-lisp
  (defmacro manx/split-and-follow (direction)
-   `(progn
-      ,direction
-      (balance-windows)
-      (other-window 1)))
+	 "Splits the window in DIRECTION and moves the caret to the new
+ window."
+	 `(progn ,direction
+			(balance-windows)
+			(other-window 1)))
 
  (global-set-key (kbd "C-x 3")
-                 (lambdainteractive () (manx/split-and-follow (split-window-below))))
+								 (lambdainteractive () (manx/split-and-follow (split-window-below))))
  (global-set-key (kbd "C-x 2")
-                 (lambdainteractive () (manx/split-and-follow (split-window-horizontally))))
+								 (lambdainteractive () (manx/split-and-follow (split-window-horizontally))))
  #+END_SRC
 ** windows
 Themes don't load in the first emacsclient for some reason so we load
@@ -352,6 +354,8 @@ it ourselves
 #+END_SRC
 ** magit
 #+BEGIN_SRC emacs-lisp
+;; This isn't using `(definteractive)`, since it breaks doc
+;; comments. I should look into a way to fix it.
 (defun manx/magit-push-all ()
   "Push all branches."
   (interactive)

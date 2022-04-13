@@ -32,8 +32,7 @@
   (if (file-newer-than-file-p manx/emacs-org manx/emacs-el)
       (org-babel-load-file manx/emacs-org)
     (load manx/emacs-el 'noerror)))
- ((manx/emacs-org)
-  (org-babel-load-file manx/emacs-org)))
+ ((org-babel-load-file manx/emacs-org)))
 
 (mapc (lambda (file)
         (when file
